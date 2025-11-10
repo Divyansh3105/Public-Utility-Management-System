@@ -72,6 +72,7 @@ $result->data_seek(0);
 <html lang="en">
 
 <head>
+    <link rel="icon" href="../assets/public.png" type="image/png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment History - <?php echo $customer_name; ?></title>

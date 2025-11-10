@@ -41,6 +41,7 @@ $logs = mysqli_query($conn, "
 <html lang="en">
 
 <head>
+    <link rel="icon" href="../assets/public.png" type="image/png">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Public Utility System</title>

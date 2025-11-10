@@ -95,9 +95,22 @@ $csrf_token = generate_csrf_token();
 <html lang="en">
 
 <head>
+    <link rel="icon" href="assets/public.png" type="image/png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Public Utility Management System</title>
+    <meta name="description" content="A full-featured PHP and MySQL-based system for managing electricity and water utility services. Includes modules for billing, payments, employee management, and real-time analytics.">
+    <meta name="keywords" content="Utility Management System, PHP MySQL Project, Electricity Billing System, Water Bill Management, Admin Dashboard, Public Utility, Smart Billing, College Project, Divyansh, Public Utility System">
+    <meta name="author" content="Divyansh">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+
+    <!-- ========== Open Graph (OG) Tags ========== -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Public Utility Management System">
+    <meta property="og:description" content="An advanced public utility management platform for handling billing, payments, and employee operations using PHP and MySQL. Perfect for B.Tech and IT project use.">
+    <meta property="og:site_name" content="Public Utility Management System">
+    <meta property="og:image" content="https://raw.githubusercontent.com/divyansh/Public-Utility-Management-System/main/assets/preview.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         * {
