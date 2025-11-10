@@ -13,7 +13,7 @@
     <br />
     <a href="#-demo">View Demo</a>
     ·
-    <a href="#-installation">Installation Guide</a>
+    <a href="#%EF%B8%8F-installation">Installation Guide</a>
     ·
     <a href="#-usage">Usage</a>
     ·
@@ -40,26 +40,26 @@
 
 ## 📋 Table of Contents
 
-- [About the Project](#about-the-project)
-- [Demo](#demo)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Database Schema](#database-schema)
-- [Screenshots](#screenshots)
-- [Security Features](#security-features)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [Bug Reports & Feature Requests](#bug-reports--feature-requests)
-- [License](#license)
-- [Author](#author)
-- [Acknowledgments](#acknowledgments)
-- [Support](#support)
+- [About the Project](#-about-the-project)
+- [Demo](#-demo)
+- [Features](#-features)
+- [Tech Stack](#%EF%B8%8F-tech-stack)
+- [Installation](#%EF%B8%8F-installation)
+- [Usage](#-usage)
+- [Database Schema](#%EF%B8%8F-database-schema)
+- [Screenshots](#%EF%B8%8F-screenshots)
+- [Security Features](#-security-features)
+- [Roadmap](#-roadmap)
+- [Contributing](#-contributing)
+- [Bug Reports & Feature Requests](#-bug-reports--feature-requests)
+- [License](#-license)
+- [Author](#-author)
+- [Acknowledgments](#-acknowledgments)
+- [Support](#-support)
 
 ---
 
-## 🎬 Demo {#demo}
+## 🎬 Demo
 
 ### Live Demo
 
@@ -132,7 +132,7 @@ The demo includes:
 
 ---
 
-## 📖 About The Project {#about-the-project}
+## 📖 About The Project
 
 The **Public Utility Management System** is a full-featured web application designed to modernize and automate the operations of public utility services. Built with PHP and MySQL, it provides a robust platform for managing electricity and water billing, customer accounts, employee operations, and financial reporting.
 
@@ -158,7 +158,7 @@ This system addresses these challenges by providing:
 
 ---
 
-## ✨ Features {#features}
+## ✨ Features
 
 ### 👑 Admin Dashboard
 
@@ -249,7 +249,7 @@ This system addresses these challenges by providing:
 
 ---
 
-## 🛠️ Tech Stack {#tech-stack}
+## 🛠️ Tech Stack
 
 ### Frontend
 
@@ -284,7 +284,7 @@ This system addresses these challenges by providing:
 
 ---
 
-## ⚙️ Installation {#installation}
+## ⚙️ Installation
 
 ### Prerequisites
 
@@ -372,7 +372,7 @@ Before you begin, ensure you have the following installed:
 
 ---
 
-## 💻 Usage {#usage}
+## 💻 Usage
 
 ### For Administrators
 
@@ -446,7 +446,7 @@ public_utility_management_system/
 
 ---
 
-## 🗄️ Database Schema {#database-schema}
+## 🗄️ Database Schema
 
 ### Core Tables
 
@@ -564,7 +564,7 @@ Stores generated reports and analytics.
 
 ---
 
-## 🖼️ Screenshots {#screenshots}
+## 🖼️ Screenshots
 
 ### Admin Dashboard
 
@@ -592,7 +592,7 @@ _Eye-friendly dark theme for extended usage_
 
 ---
 
-## 🔐 Security Features {#security-features}
+## 🔐 Security Features
 
 - **Authentication & Authorization**
 
@@ -619,7 +619,7 @@ _Eye-friendly dark theme for extended usage_
 
 ---
 
-## 🚀 Roadmap {#roadmap}
+## 🚀 Roadmap
 
 ### Phase 1 - Current Features ✅
 
@@ -682,7 +682,7 @@ _Eye-friendly dark theme for extended usage_
 
 ---
 
-## 🤝 Contributing {#contributing}
+## 🤝 Contributing
 
 Contributions make the open-source community an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
@@ -741,7 +741,7 @@ Contributions make the open-source community an amazing place to learn, inspire,
 
 ---
 
-## 🐛 Bug Reports & Feature Requests {#bug-reports--feature-requests}
+## 🐛 Bug Reports & Feature Requests
 
 Found a bug or have a feature suggestion?
 
@@ -758,7 +758,7 @@ Please include:
 
 ---
 
-## 📄 License {#license}
+## 📄 License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
@@ -772,7 +772,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
-## 👤 Author {#author}
+## 👤 Author
 
 <div align="center">
 
@@ -784,13 +784,13 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 [![Email](https://img.shields.io/badge/Email-divyanshgarg3105%40gmail.com-red?style=for-the-badge&logo=gmail&logoColor=white)](mailto:divyanshgarg3105@gmail.com)
 [![GitHub](https://img.shields.io/badge/GitHub-Divyansh3105-black?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Divyansh3105)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin&logoColor=white)](www.linkedin.com/in/divyanshgarg3105)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/divyanshgarg3105)
 
 </div>
 
 ---
 
-## 🙏 Acknowledgments {#acknowledgments}
+## 🙏 Acknowledgments
 
 - **Icons**: [Icons8](https://icons8.com)
 - **Badges**: [Shields.io](https://shields.io)
@@ -799,14 +799,14 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
-## 📞 Support {#support}
+## 📞 Support
 
 Need help? Here's how to get support:
 
 - 📖 **Documentation**: Check this README and code comments
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/Divyansh3105/public-utility-management-system/discussions)
 - 🐛 **Issues**: [Report bugs](https://github.com/Divyansh3105/public-utility-management-system/issues)
-- 📧 **Email**: divyansh.tech01@gmail.com
+- 📧 **Email**: divyanshgarg3105@gmail.com
 
 ---
 
