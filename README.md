@@ -63,7 +63,7 @@
 
 ### Live Demo
 
-> 🚀 **Try it now**: [Live Demo Link](https://http://localhost/public-utility-management-system) _(Coming Soon)_
+> 🚀 **Try it now**: [Live Demo Link](https://publicutilitymanagementsystem.gt.tc)
 
 ### Quick Demo Setup
 
