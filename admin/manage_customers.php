@@ -7,32 +7,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
     exit;
 }
 
-/**
- * Provide pagination parameters.
- * If you already have a get_pagination_params() function (from includes),
- * this won't override it.
- */
-if (!function_exists('get_pagination_params')) {
-    function get_pagination_params($default_limit = 50)
-    {
-        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-        if ($page < 1) $page = 1;
-
-        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : $default_limit;
-        // enforce reasonable bounds to avoid abuse
-        if ($limit <= 0) $limit = $default_limit;
-        if ($limit > 500) $limit = 500;
-
-        $offset = ($page - 1) * $limit;
-        if ($offset < 0) $offset = 0;
-
-        return [
-            'page' => $page,
-            'limit' => $limit,
-            'offset' => $offset
-        ];
-    }
-}
+// Pagination parameters provided by includes/functions.php
 
 // Get pagination parameters
 $pagination = get_pagination_params(50);
