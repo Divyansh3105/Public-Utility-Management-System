@@ -1,5 +1,4 @@
 <?php
-session_start();
 include('../includes/db_connect.php');
 require_once('activity_log.php');
 

@@ -127,3 +127,34 @@ function calculate_total_pages($total_records, $limit)
     return ceil($total_records / $limit);
 }
 
+
+// Secure Session Management with Cookie Security & Inactivity Timeout
+function secure_session_start()
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        $is_https = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path' => '/',
+            'domain' => '',
+            'secure' => $is_https,
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+        session_start();
+    }
+
+    // Inactivity timeout check (30 minutes = 1800 seconds)
+    $timeout = 1800;
+    if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > $timeout) {
+        $role = $_SESSION['role'] ?? null;
+        session_unset();
+        session_destroy();
+        session_start();
+        $_SESSION['timeout_msg'] = "Your session expired due to inactivity. Please log in again.";
+    }
+    $_SESSION['last_activity'] = time();
+}
+
+// Auto-invoke secure_session_start when db_connect is included
+secure_session_start();

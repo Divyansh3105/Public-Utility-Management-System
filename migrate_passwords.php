@@ -1,5 +1,4 @@
 <?php
-session_start();
 include('includes/db_connect.php');
 
 $is_cli = (php_sapi_name() === 'cli');
