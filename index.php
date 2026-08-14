@@ -16,7 +16,10 @@ if (isset($_SESSION['role'])) {
     }
 }
 
-if (isset($_POST['login']) && isset($_POST['csrf_token'])) {
+$lockout_msg = check_login_rate_limit();
+if ($lockout_msg) {
+    $error = $lockout_msg;
+} else if (isset($_POST['login']) && isset($_POST['csrf_token'])) {
     if (verify_csrf_token($_POST['csrf_token'])) {
         $username = sanitize_input($_POST['email']);
         $password = $_POST['password'];
@@ -35,6 +38,7 @@ if (isset($_POST['login']) && isset($_POST['csrf_token'])) {
                 $_SESSION['name'] = $admin['Name'];
                 $_SESSION['admin_name'] = $admin['Name'];
                 $_SESSION['admin_id'] = $admin['Admin_ID'];
+                reset_login_rate_limit();
                 $stmt->close();
                 header("Location: admin/dashboard_admin.php");
                 exit;
@@ -55,6 +59,7 @@ if (isset($_POST['login']) && isset($_POST['csrf_token'])) {
                 $_SESSION['role'] = 'employee';
                 $_SESSION['name'] = $employee['Name'];
                 $_SESSION['employee_id'] = $employee['Employee_ID'];
+                reset_login_rate_limit();
                 $stmt->close();
                 header("Location: employee/dashboard_employee.php");
                 exit;
@@ -75,6 +80,7 @@ if (isset($_POST['login']) && isset($_POST['csrf_token'])) {
                 $_SESSION['role'] = 'customer';
                 $_SESSION['name'] = $customer['Name'];
                 $_SESSION['customer_id'] = $customer['Customer_ID'];
+                reset_login_rate_limit();
                 $stmt->close();
                 header("Location: customer/dashboard_customer.php");
                 exit;
@@ -82,7 +88,13 @@ if (isset($_POST['login']) && isset($_POST['csrf_token'])) {
         }
         $stmt->close();
 
-        $error = "Invalid credentials. Please try again.";
+        record_failed_login();
+        $attempts_left = 5 - ($_SESSION['failed_login_attempts'] ?? 0);
+        if ($attempts_left <= 0) {
+            $error = "Too many failed login attempts. Account temporarily locked for 5 minutes.";
+        } else {
+            $error = "Invalid credentials. Please try again. ({$attempts_left} attempt(s) remaining)";
+        }
     } else {
         $error = "Invalid request. Please try again.";
     }

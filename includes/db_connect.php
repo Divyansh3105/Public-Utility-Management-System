@@ -172,3 +172,46 @@ function redirect($path)
         exit;
     }
 }
+
+// Login Rate Limiting & Brute-Force Protection
+function check_login_rate_limit()
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    if (isset($_SESSION['lockout_until'])) {
+        $remaining = $_SESSION['lockout_until'] - time();
+        if ($remaining > 0) {
+            $mins = ceil($remaining / 60);
+            return "Too many failed login attempts. Please wait {$mins} minute(s) before trying again.";
+        } else {
+            unset($_SESSION['lockout_until']);
+            $_SESSION['failed_login_attempts'] = 0;
+        }
+    }
+
+    return false;
+}
+
+function record_failed_login()
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    $_SESSION['failed_login_attempts'] = ($_SESSION['failed_login_attempts'] ?? 0) + 1;
+
+    if ($_SESSION['failed_login_attempts'] >= 5) {
+        $_SESSION['lockout_until'] = time() + 300; // 5-minute lockout
+    }
+}
+
+function reset_login_rate_limit()
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    unset($_SESSION['failed_login_attempts']);
+    unset($_SESSION['lockout_until']);
+}
