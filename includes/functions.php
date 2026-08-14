@@ -116,3 +116,36 @@ if (!function_exists("get_flash_msg")) {
         return null;
     }
 }
+
+/**
+ * Render standardized flash message alert banner
+ */
+if (!function_exists("display_flash_msg")) {
+    function display_flash_msg($fallback_msg = null, $fallback_type = "success") {
+        $flash = get_flash_msg();
+        $msg = $flash["msg"] ?? $fallback_msg;
+        $type = $flash["type"] ?? $fallback_type;
+
+        if (empty($msg)) return "";
+
+        $type_clean = strtolower(trim($type));
+        $bg_class = "alert-info";
+        $icon = "fa-info-circle";
+
+        if ($type_clean === "success") {
+            $bg_class = "alert-success";
+            $icon = "fa-check-circle";
+        } else if ($type_clean === "error" || $type_clean === "danger") {
+            $bg_class = "alert-danger";
+            $icon = "fa-exclamation-circle";
+        } else if ($type_clean === "warning") {
+            $bg_class = "alert-warning";
+            $icon = "fa-triangle-exclamation";
+        }
+
+        return '<div class="alert ' . $bg_class . '" style="display:flex; align-items:center; gap:10px; margin: 15px 0;">' .
+               '<i class="fas ' . $icon . '"></i>' .
+               '<span>' . e($msg) . '</span>' .
+               '</div>';
+    }
+}

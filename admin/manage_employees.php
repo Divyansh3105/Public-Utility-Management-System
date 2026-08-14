@@ -197,12 +197,7 @@ $csrf_token = generate_csrf_token();
     </header>
 
     <div class="dashboard-content">
-        <?php if (isset($toast)): ?>
-            <div class="alert alert-<?= $toast_type ?>">
-                <i class="fas <?= $toast_type == 'success' ? 'fa-check-circle' : 'fa-times-circle' ?>"></i>
-                <span><?= htmlspecialchars($toast) ?></span>
-            </div>
-        <?php endif; ?>
+        <?= display_flash_msg($toast ?? $msg ?? null, $toast_type ?? $msg_type ?? "success") ?>
 
         <div class="stats-grid">
             <div class="stat-card">

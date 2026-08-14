@@ -198,12 +198,7 @@ $csrf_token = generate_csrf_token();
     </header>
 
     <div class="dashboard-content">
-        <?php if (isset($msg)): ?>
-            <div class="alert alert-<?= $msg_type ?>">
-                <i class="fas <?= $msg_type == 'success' ? 'fa-check-circle' : 'fa-times-circle' ?>"></i>
-                <span><?= htmlspecialchars($msg) ?></span>
-            </div>
-        <?php endif; ?>
+        <?= display_flash_msg($toast ?? $msg ?? null, $toast_type ?? $msg_type ?? "success") ?>
 
         <h2 class="section-header"><i class="fas fa-plus-circle"></i> New Bill Form</h2>
 
