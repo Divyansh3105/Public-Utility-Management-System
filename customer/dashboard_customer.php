@@ -2,7 +2,7 @@
 include('../includes/db_connect.php');
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] != 'customer') {
-    header('Location: index.php');
+    redirect('index.php');
     exit;
 }
 

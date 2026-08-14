@@ -3,7 +3,7 @@ include('../includes/db_connect.php');
 include('activity_log.php');
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
-    header("Location: index.php");
+    redirect('index.php');
     exit;
 }
 

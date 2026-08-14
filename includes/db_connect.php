@@ -1,4 +1,5 @@
-﻿<?php
+<?php
+require_once(__DIR__ . '/config.php');
 $host = "localhost";
 $user = "root";
 $pass = "";
@@ -158,3 +159,16 @@ function secure_session_start()
 
 // Auto-invoke secure_session_start when db_connect is included
 secure_session_start();
+
+// Helper for safe URL redirection using BASE_URL
+function redirect($path)
+{
+    $target = (strpos($path, 'http') === 0) ? $path : BASE_URL . ltrim($path, '/');
+    if (!headers_sent()) {
+        header("Location: " . $target);
+        exit;
+    } else {
+        echo "<script>window.location.href='" . htmlspecialchars($target, ENT_QUOTES, 'UTF-8') . "';</script>";
+        exit;
+    }
+}
