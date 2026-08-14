@@ -23,13 +23,19 @@ $conn->query("SET SESSION tmp_table_size = 256000000");
 $conn->query("SET SESSION max_heap_table_size = 256000000");
 
 // Function to sanitize input
+// Function to clean input strings safely for processing and prepared statements
 function sanitize_input($data)
 {
-    global $conn;
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
-    return $conn->real_escape_string($data);
+    if (is_array($data)) {
+        return array_map('sanitize_input', $data);
+    }
+    return trim((string)$data);
+}
+
+// Function to safely escape string for HTML rendering (XSS protection)
+function e($data)
+{
+    return htmlspecialchars($data ?? '', ENT_QUOTES, 'UTF-8');
 }
 
 // Function to generate CSRF token

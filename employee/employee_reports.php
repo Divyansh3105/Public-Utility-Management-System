@@ -21,7 +21,7 @@ $filtered_total = null;
 if (isset($_GET['from']) && isset($_GET['to'])) {
     $from = $_GET['from'];
     $to = $_GET['to'];
-    $filtered = $conn->query("SELECT SUM(Amount_Paid) AS total FROM payment WHERE Date_of_Payment BETWEEN '$from' AND '$to'");
+    $stmt = $conn->prepare("SELECT SUM(Amount_Paid) AS total FROM payment WHERE Date_of_Payment BETWEEN ? AND ?"); $stmt->bind_param("ss", $from, $to); $stmt->execute(); $filtered = $stmt->get_result();
     $row = $filtered->fetch_assoc();
     $filtered_total = $row['total'] ?? 0;
 }

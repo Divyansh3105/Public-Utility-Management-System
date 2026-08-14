@@ -11,7 +11,7 @@ $emp_id = $_SESSION['employee_id'];
 $name = $_SESSION['name'];
 
 // Fetch logs
-$logs = $conn->query("SELECT Action, Description, Log_Time FROM employee_log WHERE Employee_ID = $emp_id ORDER BY Log_Time DESC");
+$stmt = $conn->prepare("SELECT Action, Description, Log_Time FROM employee_log WHERE Employee_ID = ? ORDER BY Log_Time DESC"); $stmt->bind_param("i", $emp_id); $stmt->execute(); $logs = $stmt->get_result();
 ?>
 <!DOCTYPE html>
 <html lang="en">

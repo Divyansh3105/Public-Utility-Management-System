@@ -10,7 +10,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != 'customer') {
 $customer_id = intval($_SESSION['customer_id']);
 $customer_name = 'Customer';
 
-$res = $conn->query("SELECT Name FROM customer WHERE Customer_ID = $customer_id");
+$stmt = $conn->prepare("SELECT Name FROM customer WHERE Customer_ID = ?"); $stmt->bind_param("i", $customer_id); $stmt->execute(); $res = $stmt->get_result();
 if ($res && $res->num_rows > 0) {
     $customer_name = htmlspecialchars($res->fetch_assoc()['Name']);
 }
