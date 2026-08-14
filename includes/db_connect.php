@@ -215,3 +215,22 @@ function reset_login_rate_limit()
     unset($_SESSION['failed_login_attempts']);
     unset($_SESSION['lockout_until']);
 }
+
+// Helper to render hidden CSRF token input field in HTML forms
+function csrf_field()
+{
+    $token = generate_csrf_token();
+    return '<input type="hidden" name="csrf_token" value="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '">';
+}
+
+// Helper to strictly enforce CSRF verification on incoming POST requests
+function enforce_csrf()
+{
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $token = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+        if (!verify_csrf_token($token)) {
+            http_response_code(403);
+            die("Invalid or expired CSRF token. Please refresh the page and try again.");
+        }
+    }
+}

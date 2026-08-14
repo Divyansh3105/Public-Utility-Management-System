@@ -26,7 +26,7 @@ if (isset($_GET['from']) && isset($_GET['to'])) {
 }
 
 // Handle CSV export
-if (isset($_POST['export_csv'])) {
+if (isset($_POST['export_csv']) && verify_csrf_token($_POST['csrf_token'] ?? '')) {
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment;filename="payment_report.csv"');
     $output = fopen('php://output', 'w');
@@ -106,7 +106,7 @@ if (isset($_POST['export_csv'])) {
         <?php endif; ?>
 
         <h2 class="section-header"><i class="fas fa-download"></i> Export Reports</h2>
-        <form method="POST">
+        <form method="POST"><input type="hidden" name="csrf_token" value="<?= generate_csrf_token(); ?>">
             <button class="btn btn-success" name="export_csv">
                 <i class="fas fa-file-csv"></i> Export to CSV
             </button>

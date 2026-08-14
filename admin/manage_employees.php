@@ -20,7 +20,7 @@ $start_from = ($page - 1) * $results_per_page;
 
 /* --- CRUD Operations --- */
 // DELETE
-if (isset($_POST['confirm_delete']) && isset($_POST['delete_id'])) {
+if (isset($_POST['confirm_delete']) && isset($_POST['delete_id']) && verify_csrf_token($_POST['csrf_token'] ?? '')) {
     $id = intval($_POST['delete_id']);
     $emp_result = mysqli_query($conn, "SELECT Name FROM employee WHERE Employee_ID = $id");
     $emp = mysqli_fetch_assoc($emp_result);
