@@ -30,7 +30,7 @@ if (isset($_POST['login']) && isset($_POST['csrf_token'])) {
 
         if ($res->num_rows == 1) {
             $admin = $res->fetch_assoc();
-            if ($password === $admin['Password']) {
+            if (verify_user_password($conn, 'admin', 'Admin_ID', $admin['Admin_ID'], $password, $admin['Password'])) {
                 session_regenerate_id(true);
                 $_SESSION['role'] = 'admin';
                 $_SESSION['name'] = $admin['Name'];
@@ -51,7 +51,7 @@ if (isset($_POST['login']) && isset($_POST['csrf_token'])) {
 
         if ($res->num_rows == 1) {
             $employee = $res->fetch_assoc();
-            if ($password === $employee['Password']) {
+            if (verify_user_password($conn, 'employee', 'Employee_ID', $employee['Employee_ID'], $password, $employee['Password'])) {
                 session_regenerate_id(true);
                 $_SESSION['role'] = 'employee';
                 $_SESSION['name'] = $employee['Name'];
@@ -71,7 +71,7 @@ if (isset($_POST['login']) && isset($_POST['csrf_token'])) {
 
         if ($res->num_rows == 1) {
             $customer = $res->fetch_assoc();
-            if ($password === $customer['Password']) {
+            if (verify_user_password($conn, 'customer', 'Customer_ID', $customer['Customer_ID'], $password, $customer['Password'])) {
                 session_regenerate_id(true);
                 $_SESSION['role'] = 'customer';
                 $_SESSION['name'] = $customer['Name'];

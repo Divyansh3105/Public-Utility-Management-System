@@ -44,7 +44,7 @@ if (isset($_POST['add_employee']) && verify_csrf_token($_POST['csrf_token'])) {
     $name = sanitize_input($_POST['name']);
     $role = sanitize_input($_POST['role']);
     $phone = sanitize_input($_POST['phone']);
-    $password = sanitize_input($_POST['password']);
+    $password = hash_password($_POST['password']);
 
     $stmt = $conn->prepare("INSERT INTO employee (Name, Role, Phone, Password) VALUES (?, ?, ?, ?)");
     $stmt->bind_param("ssss", $name, $role, $phone, $password);

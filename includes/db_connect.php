@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $host = "localhost";
 $user = "root";
 $pass = "";
@@ -65,6 +65,42 @@ function verify_password($password, $hash)
     return password_verify($password, $hash);
 }
 
+// Function to verify user password with automatic legacy plain-text password migration
+function verify_user_password($conn, $table, $id_field, $user_id, $input_password, $stored_hash)
+{
+    if (empty($stored_hash)) {
+        return false;
+    }
+
+    // Standard Bcrypt verification
+    if (password_verify($input_password, $stored_hash)) {
+        if (password_needs_rehash($stored_hash, PASSWORD_DEFAULT)) {
+            $new_hash = password_hash($input_password, PASSWORD_DEFAULT);
+            $stmt = $conn->prepare("UPDATE `$table` SET `Password` = ? WHERE `$id_field` = ?");
+            if ($stmt) {
+                $stmt->bind_param("si", $new_hash, $user_id);
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+        return true;
+    }
+
+    // Transparent migration for legacy plain text passwords
+    if ($input_password === $stored_hash) {
+        $new_hash = password_hash($input_password, PASSWORD_DEFAULT);
+        $stmt = $conn->prepare("UPDATE `$table` SET `Password` = ? WHERE `$id_field` = ?");
+        if ($stmt) {
+            $stmt->bind_param("si", $new_hash, $user_id);
+            $stmt->execute();
+            $stmt->close();
+        }
+        return true;
+    }
+
+    return false;
+}
+
 // Pagination helper function
 function get_pagination_params($default_limit = 50)
 {
@@ -84,3 +120,4 @@ function calculate_total_pages($total_records, $limit)
 {
     return ceil($total_records / $limit);
 }
+

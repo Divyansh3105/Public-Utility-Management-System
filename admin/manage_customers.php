@@ -84,7 +84,7 @@ if (isset($_POST['add_customer']) && isset($_POST['csrf_token'])) {
         $name = sanitize_input($_POST['name']);
         $phone = sanitize_input($_POST['phone']);
         $email = sanitize_input($_POST['email']);
-        $password = sanitize_input($_POST['password']);
+        $password = hash_password($_POST['password']);
 
         $house_stmt = $conn->prepare("INSERT INTO house (House_Number, Owner_Name, Address) VALUES (?, ?, ?)");
         $house_stmt->bind_param("sss", $house_num, $owner, $address);
