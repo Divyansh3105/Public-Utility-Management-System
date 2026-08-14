@@ -1,12 +1,7 @@
 <?php
 require_once(__DIR__ . '/config.php');
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db = "public_utility_system";
-
-// Create connection with error handling
-$conn = new mysqli($host, $user, $pass, $db);
+// Create connection using centralized configuration constants
+$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
 
 if ($conn->connect_error) {
     error_log("Database Connection Failed: " . $conn->connect_error);
