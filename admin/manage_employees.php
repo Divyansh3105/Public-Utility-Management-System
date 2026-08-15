@@ -39,42 +39,52 @@ if (isset($_POST['confirm_delete']) && isset($_POST['delete_id']) && verify_csrf
 }
 
 // ADD
-if (isset($_POST['add_employee']) && verify_csrf_token($_POST['csrf_token'])) {
+if (isset($_POST['add_employee']) && verify_csrf_token($_POST['csrf_token'] ?? '')) {
     $name = sanitize_input($_POST['name']);
     $role = sanitize_input($_POST['role']);
     $phone = sanitize_input($_POST['phone']);
     $password = hash_password($_POST['password']);
 
-    $stmt = $conn->prepare("INSERT INTO employee (Name, Role, Phone, Password) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssss", $name, $role, $phone, $password);
-
-    if ($stmt->execute()) {
-        $toast = "Employee added successfully!";
-        $toast_type = "success";
-    } else {
-        $toast = "Error adding employee: " . $conn->error;
+    if (!validate_phone($phone)) {
+        $toast = "Invalid phone number! Please enter a 10-15 digit phone number.";
         $toast_type = "error";
+    } else {
+        $stmt = $conn->prepare("INSERT INTO employee (Name, Role, Phone, Password) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("ssss", $name, $role, $phone, $password);
+
+        if ($stmt->execute()) {
+            $toast = "Employee added successfully!";
+            $toast_type = "success";
+        } else {
+            $toast = "Error adding employee: " . $conn->error;
+            $toast_type = "error";
+        }
+        $stmt->close();
     }
-    $stmt->close();
 }
 
 // EDIT
-if (isset($_POST['edit_employee']) && verify_csrf_token($_POST['csrf_token'])) {
+if (isset($_POST['edit_employee']) && verify_csrf_token($_POST['csrf_token'] ?? '')) {
     $id = intval($_POST['employee_id']);
     $name = sanitize_input($_POST['name']);
     $role = sanitize_input($_POST['role']);
     $phone = sanitize_input($_POST['phone']);
 
-    $stmt = $conn->prepare("UPDATE employee SET Name=?, Role=?, Phone=? WHERE Employee_ID=?");
-    $stmt->bind_param("sssi", $name, $role, $phone, $id);
-    if ($stmt->execute()) {
-        $toast = "Employee updated successfully!";
-        $toast_type = "success";
-    } else {
-        $toast = "Error updating employee: " . $conn->error;
+    if (!validate_phone($phone)) {
+        $toast = "Invalid phone number! Please enter a 10-15 digit phone number.";
         $toast_type = "error";
+    } else {
+        $stmt = $conn->prepare("UPDATE employee SET Name=?, Role=?, Phone=? WHERE Employee_ID=?");
+        $stmt->bind_param("sssi", $name, $role, $phone, $id);
+        if ($stmt->execute()) {
+            $toast = "Employee updated successfully!";
+            $toast_type = "success";
+        } else {
+            $toast = "Error updating employee: " . $conn->error;
+            $toast_type = "error";
+        }
+        $stmt->close();
     }
-    $stmt->close();
 }
 
 /* --- Fetch Records for Current Page --- */

@@ -149,3 +149,22 @@ if (!function_exists("display_flash_msg")) {
                '</div>';
     }
 }
+
+/**
+ * Validate phone number format (10-15 digits)
+ */
+if (!function_exists("validate_phone")) {
+    function validate_phone($phone) {
+        $clean = preg_replace("/[^0-9]/", "", (string)$phone);
+        return (bool)preg_match("/^[0-9]{10,15}$/", $clean);
+    }
+}
+
+/**
+ * Validate email address format
+ */
+if (!function_exists("validate_email")) {
+    function validate_email($email) {
+        return (bool)filter_var(trim((string)$email), FILTER_VALIDATE_EMAIL);
+    }
+}

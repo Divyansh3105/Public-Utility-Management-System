@@ -7,8 +7,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
     exit;
 }
 
-// Pagination parameters provided by includes/functions.php
-
 // Get pagination parameters
 $pagination = get_pagination_params(50);
 $page = $pagination['page'];
@@ -38,6 +36,8 @@ if (isset($_POST['confirm_delete']) && isset($_POST['csrf_token'])) {
             $stmt = $conn->prepare("DELETE FROM customer WHERE Customer_ID=?");
             $stmt->bind_param("i", $id);
             if ($stmt->execute()) {
+                $admin_id = $_SESSION['admin_id'] ?? 1;
+                logActivity($conn, $admin_id, "Deleted customer ID $id");
                 $toast = "Customer deleted successfully!";
                 $toast_type = "success";
             } else {
@@ -60,27 +60,35 @@ if (isset($_POST['add_customer']) && isset($_POST['csrf_token'])) {
         $email = sanitize_input($_POST['email']);
         $password = hash_password($_POST['password']);
 
-        $house_stmt = $conn->prepare("INSERT INTO house (House_Number, Owner_Name, Address) VALUES (?, ?, ?)");
-        $house_stmt->bind_param("sss", $house_num, $owner, $address);
+        if (!validate_phone($phone)) {
+            $toast = "Invalid phone number! Please enter a 10-15 digit phone number.";
+            $toast_type = "error";
+        } else if (!validate_email($email)) {
+            $toast = "Invalid email address format!";
+            $toast_type = "error";
+        } else {
+            $house_stmt = $conn->prepare("INSERT INTO house (House_Number, Owner_Name, Address) VALUES (?, ?, ?)");
+            $house_stmt->bind_param("sss", $house_num, $owner, $address);
 
-        if ($house_stmt->execute()) {
-            $house_id = $house_stmt->insert_id;
-            $cust_stmt = $conn->prepare("INSERT INTO customer (Name, Phone, Email, Password, House_ID) VALUES (?, ?, ?, ?, ?)");
-            $cust_stmt->bind_param("ssssi", $name, $phone, $email, $password, $house_id);
+            if ($house_stmt->execute()) {
+                $house_id = $conn->insert_id;
+                $cust_stmt = $conn->prepare("INSERT INTO customer (Name, Phone, Email, Password, House_ID) VALUES (?, ?, ?, ?, ?)");
+                $cust_stmt->bind_param("ssssi", $name, $phone, $email, $password, $house_id);
 
-            if ($cust_stmt->execute()) {
-                $toast = "Customer and House added successfully!";
-                $toast_type = "success";
+                if ($cust_stmt->execute()) {
+                    $toast = "Customer and House added successfully!";
+                    $toast_type = "success";
+                } else {
+                    $toast = "Failed to add customer: " . $conn->error;
+                    $toast_type = "error";
+                }
+                $cust_stmt->close();
             } else {
-                $toast = "Failed to add customer: " . $conn->error;
+                $toast = "Failed to add house: " . $conn->error;
                 $toast_type = "error";
             }
-            $cust_stmt->close();
-        } else {
-            $toast = "Failed to add house: " . $conn->error;
-            $toast_type = "error";
+            $house_stmt->close();
         }
-        $house_stmt->close();
     }
 }
 
@@ -96,22 +104,30 @@ if (isset($_POST['edit_customer']) && isset($_POST['csrf_token'])) {
         $owner_name = sanitize_input($_POST['owner_name']);
         $address = sanitize_input($_POST['address']);
 
-        $hstmt = $conn->prepare("UPDATE house SET House_Number=?, Owner_Name=?, Address=? WHERE House_ID=?");
-        $hstmt->bind_param("sssi", $house_number, $owner_name, $address, $house_id);
-        $h_ok = $hstmt->execute();
-        $hstmt->close();
-
-        $cstmt = $conn->prepare("UPDATE customer SET Name=?, Phone=?, Email=? WHERE Customer_ID=?");
-        $cstmt->bind_param("sssi", $name, $phone, $email, $customer_id);
-        $c_ok = $cstmt->execute();
-        $cstmt->close();
-
-        if ($h_ok && $c_ok) {
-            $toast = "Customer & House updated successfully!";
-            $toast_type = "success";
-        } else {
-            $toast = "Error updating records: " . $conn->error;
+        if (!validate_phone($phone)) {
+            $toast = "Invalid phone number! Please enter a 10-15 digit phone number.";
             $toast_type = "error";
+        } else if (!validate_email($email)) {
+            $toast = "Invalid email address format!";
+            $toast_type = "error";
+        } else {
+            $hstmt = $conn->prepare("UPDATE house SET House_Number=?, Owner_Name=?, Address=? WHERE House_ID=?");
+            $hstmt->bind_param("sssi", $house_number, $owner_name, $address, $house_id);
+            $h_ok = $hstmt->execute();
+            $hstmt->close();
+
+            $cstmt = $conn->prepare("UPDATE customer SET Name=?, Phone=?, Email=? WHERE Customer_ID=?");
+            $cstmt->bind_param("sssi", $name, $phone, $email, $customer_id);
+            $c_ok = $cstmt->execute();
+            $cstmt->close();
+
+            if ($h_ok && $c_ok) {
+                $toast = "Customer & House updated successfully!";
+                $toast_type = "success";
+            } else {
+                $toast = "Error updating records: " . $conn->error;
+                $toast_type = "error";
+            }
         }
     }
 }
@@ -119,28 +135,22 @@ if (isset($_POST['edit_customer']) && isset($_POST['csrf_token'])) {
 // FETCH counts
 $total_customers = (int)$conn->query("SELECT COUNT(*) as count FROM customer")->fetch_assoc()['count'];
 $active_bills = $conn->query("
-    SELECT COUNT(*) as count FROM (
+    SELECT COUNT(*) as unpaid FROM (
         SELECT Bill_ID FROM electric_bill WHERE Status='Unpaid'
         UNION ALL
         SELECT Bill_ID FROM water_bill WHERE Status='Unpaid'
-    ) as bills
-")->fetch_assoc()['count'];
+    ) as b
+")->fetch_assoc()['unpaid'];
 
-// Compute total pages
-$total_pages = $limit > 0 ? (int)ceil($total_customers / $limit) : 1;
-if ($total_pages < 1) $total_pages = 1;
-if ($page > $total_pages) $page = $total_pages;
+$total_pages = max(1, ceil($total_customers / $limit));
 
-// FETCH customers with LIMIT/OFFSET for pagination
-$limit_safe = (int)$limit;
-$offset_safe = (int)$offset;
-$sql = "SELECT c.*, h.House_ID, h.House_Number, h.Owner_Name, h.Address
+$sql = "SELECT c.Customer_ID, c.Name, c.Phone, c.Email, c.Password, c.House_ID,
+               h.House_Number, h.Owner_Name, h.Address
         FROM customer c
         LEFT JOIN house h ON c.House_ID = h.House_ID
-        ORDER BY Customer_ID ASC
-        LIMIT $limit_safe OFFSET $offset_safe";
+        ORDER BY c.Customer_ID ASC
+        LIMIT $limit OFFSET $offset";
 $result = $conn->query($sql);
-
 $csrf_token = generate_csrf_token();
 ?>
 <!DOCTYPE html>

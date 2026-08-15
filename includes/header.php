@@ -37,6 +37,7 @@ $base = defined("BASE_URL") ? BASE_URL : "/Public_Utility_Management_System/";
                 <i class="fas fa-moon"></i>
                 <span>Dark Mode</span>
             </button>
+            <a href="<?= $base ?>profile.php" class="btn-icon" style="background:linear-gradient(135deg,#3b82f6,#0284c7);"><i class="fas fa-user-gear"></i><span>Profile</span></a>
             <a href="<?= $base ?>logout.php" class="btn-icon logout">
                 <i class="fas fa-right-from-bracket"></i>
                 <span>Logout</span>

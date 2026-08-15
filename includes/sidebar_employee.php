@@ -23,5 +23,8 @@ $active = $active_page ?? "";
         <li class="<?= $active === "logs" ? "active" : "" ?>">
             <a href="<?= $base ?>employee/employee_logs.php"><i class="fas fa-list-check"></i> Action Logs</a>
         </li>
+        <li class="<?= $active === "profile" ? "active" : "" ?>">
+            <a href="<?= $base ?>profile.php"><i class="fas fa-user-gear"></i> Profile & Security</a>
+        </li>
     </ul>
 </aside>

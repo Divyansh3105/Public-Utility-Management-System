@@ -20,5 +20,8 @@ $active = $active_page ?? "";
         <li class="<?= $active === "history" ? "active" : "" ?>">
             <a href="<?= $base ?>customer/customer_payment_history.php"><i class="fas fa-history"></i> Payment History</a>
         </li>
+        <li class="<?= $active === "profile" ? "active" : "" ?>">
+            <a href="<?= $base ?>profile.php"><i class="fas fa-user-gear"></i> Profile & Security</a>
+        </li>
     </ul>
 </aside>
