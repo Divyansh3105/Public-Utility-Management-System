@@ -33,6 +33,7 @@ $result = $conn->query($query);
 if (!$result) {
     die('Query failed: ' . $conn->error);
 }
+$active_page = 'logs';
 ?>
 <!DOCTYPE html>
 <html lang='en'>
@@ -41,7 +42,7 @@ if (!$result) {
     <link rel="icon" href="../assets/public.png" type="image/png">
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>View Logs - Public Utility System</title>
+    <title>Activity Logs - Public Utility System</title>
     <link rel='stylesheet' href='../assets/style.css'>
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css'>
     <style>
@@ -125,19 +126,28 @@ if (!$result) {
 </head>
 
 <body>
-    <header class='dashboard-header' id='header'>
-        <div class='header-left'>
-            <h1><i class='fas fa-clipboard-list'></i> Activity Logs</h1>
-            <p>Track all actions performed by administrators</p>
-        </div>
-        <div class='header-actions'>
-            <button id='toggle-theme' class='btn-icon'><i class='fas fa-moon'></i><span>Dark Mode</span></button>
-            <a href='dashboard_admin.php' class='btn-icon'><i class='fas fa-arrow-left'></i><span>Back</span></a>
-            <a href='logout.php' class='btn-icon logout'><i class='fas fa-right-from-bracket'></i><span>Logout</span></a>
-        </div>
-    </header>
+    <div class="dashboard-layout">
+        <?php include('../includes/sidebar_admin.php'); ?>
 
-    <div class='dashboard-content'>
+        <div class="main-content">
+            <header class='dashboard-header' id='header'>
+                <div class='header-left'>
+                    <button class="sidebar-mobile-toggle" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="header-title-block">
+                        <h1><i class='fas fa-clipboard-list'></i> Activity Logs</h1>
+                        <p>Track all actions performed by administrators</p>
+                    </div>
+                </div>
+                <div class='header-actions'>
+                    <button id='toggle-theme' class='btn-icon'><i class='fas fa-moon'></i><span>Dark Mode</span></button>
+                    <a href='dashboard_admin.php' class='btn-icon'><i class='fas fa-arrow-left'></i><span>Dashboard</span></a>
+                    <a href='../logout.php' class='btn-icon logout'><i class='fas fa-right-from-bracket'></i><span>Logout</span></a>
+                </div>
+            </header>
+
+            <div class='dashboard-content'>
         <div class='filter-bar'>
             <input type='text' id='searchInput' placeholder='🔍 Search by user, action, or date...'>
             <select id='sortSelect'>
@@ -277,6 +287,8 @@ if (!$result) {
         searchInput.addEventListener('keyup', filterTable);
         sortSelect.addEventListener('change', sortTable);
     </script>
-</body>
+            </div> <!-- close .dashboard-content -->
+        </div> <!-- close .main-content -->
+    </div> <!-- close .dashboard-layout -->
 
-</html>
+    <?php include('../includes/footer.php'); ?>

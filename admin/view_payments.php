@@ -60,6 +60,7 @@ while ($r = $res->fetch_assoc()) {
         $payment_modes[$r['Mode_of_Payment']] = $r['cnt'];
     }
 }
+$active_page = 'payments';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -68,7 +69,7 @@ while ($r = $res->fetch_assoc()) {
     <link rel="icon" href="../assets/public.png" type="image/png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Payments - Public Utility System</title>
+    <title>Payment Records - Public Utility System</title>
     <link rel="stylesheet" href="../assets/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
@@ -154,19 +155,28 @@ while ($r = $res->fetch_assoc()) {
 </head>
 
 <body>
-    <header class="dashboard-header" id="header">
-        <div class="header-left">
-            <h1><i class="fas fa-money-check-alt"></i> Payment Records</h1>
-            <p>View all payment transactions and revenue details</p>
-        </div>
-        <div class="header-actions">
-            <button id="toggle-theme" class="btn-icon"><i class="fas fa-moon"></i><span>Dark Mode</span></button>
-            <a href="dashboard_admin.php" class="btn-icon"><i class="fas fa-arrow-left"></i><span>Back</span></a>
-            <a href="../logout.php" class="btn-icon logout"><i class="fas fa-right-from-bracket"></i><span>Logout</span></a>
-        </div>
-    </header>
+    <div class="dashboard-layout">
+        <?php include('../includes/sidebar_admin.php'); ?>
 
-    <div class="dashboard-content">
+        <div class="main-content">
+            <header class="dashboard-header" id="header">
+                <div class="header-left">
+                    <button class="sidebar-mobile-toggle" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="header-title-block">
+                        <h1><i class="fas fa-money-check-alt"></i> Payment Records</h1>
+                        <p>View all payment transactions and revenue details</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="toggle-theme" class="btn-icon"><i class="fas fa-moon"></i><span>Dark Mode</span></button>
+                    <a href="dashboard_admin.php" class="btn-icon"><i class="fas fa-arrow-left"></i><span>Dashboard</span></a>
+                    <a href="../logout.php" class="btn-icon logout"><i class="fas fa-right-from-bracket"></i><span>Logout</span></a>
+                </div>
+            </header>
+
+            <div class="dashboard-content">
         <div class="stats-grid">
             <div class="stat-card">
                 <h3><i class="fas fa-rupee-sign"></i> Total Revenue</h3>
@@ -329,7 +339,9 @@ while ($r = $res->fetch_assoc()) {
         searchInput.addEventListener('keyup', filterTable);
         sortSelect.addEventListener('change', sortTable);
     </script>
-</body>
+            </div> <!-- close .dashboard-content -->
+        </div> <!-- close .main-content -->
+    </div> <!-- close .dashboard-layout -->
 
-</html>
+    <?php include('../includes/footer.php'); ?>
 <?php $stmt->close(); ?>

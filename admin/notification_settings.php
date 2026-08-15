@@ -170,13 +170,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['test_whatsapp_btn']))
 // Fetch current settings
 $s = getNotificationSettings($conn, true);
 $csrf_token = generate_csrf_token();
+$active_page = 'notification_settings';
+$page_title = 'Notification Engine Settings - Public Utility System';
 ?>
 <?php include('../includes/header.php'); ?>
 
-<div class="dashboard-layout" style="display: flex; gap: 20px;">
-    <?php include('../includes/sidebar_admin.php'); ?>
-
-    <div class="dashboard-content" style="flex: 1; min-width: 0;">
+<div class="dashboard-content">
         <?= display_flash_msg($msg, $msg_type) ?>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
@@ -470,7 +469,6 @@ $csrf_token = generate_csrf_token();
             </div>
         </div>
     </div>
-</div>
 
 <script>
 function toggleEmailSections() {

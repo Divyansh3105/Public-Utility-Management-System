@@ -1,10 +1,40 @@
+        </div> <!-- close .main-content -->
+    </div> <!-- close .dashboard-layout -->
+
     <div id="toast-container"></div>
 
-    <footer class="app-footer" style="text-align: center; padding: 20px; color: #94a3b8; font-size: 0.9rem; margin-top: 40px;">
-        <p>&copy; <?= date("Y") ?> Public Utility Management System. All rights reserved.</p>
+    <footer class="app-footer" style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.85rem; margin-top: auto;">
+        <p>&copy; <?= date("Y") ?> Public Utility Management System &bull; Enterprise Operations Suite</p>
     </footer>
 
     <script>
+        // Global Sidebar Toggle for Responsive Mobile Navigation
+        function toggleSidebar() {
+            const sidebar = document.getElementById("appSidebar");
+            const backdrop = document.getElementById("sidebarBackdrop");
+            if (sidebar) sidebar.classList.toggle("open");
+            if (backdrop) backdrop.classList.toggle("active");
+        }
+
+        // Global Theme Toggle with LocalStorage
+        function toggleTheme() {
+            document.body.classList.toggle("dark-mode");
+            const isDark = document.body.classList.contains("dark-mode");
+            localStorage.setItem("theme", isDark ? "dark" : "light");
+            updateThemeIcons(isDark);
+        }
+
+        function updateThemeIcons(isDark) {
+            const themeIcons = document.querySelectorAll(".theme-icon, #toggle-theme i");
+            themeIcons.forEach(icon => {
+                icon.className = isDark ? "fas fa-sun" : "fas fa-moon";
+            });
+            const themeLabels = document.querySelectorAll("#toggle-theme span");
+            themeLabels.forEach(label => {
+                label.textContent = isDark ? "Light Mode" : "Dark Mode";
+            });
+        }
+
         // Global Toast Notification Helper
         function showToast(message, type = "success", duration = 4000) {
             const container = document.getElementById("toast-container");
@@ -29,34 +59,23 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            // Theme Toggle Logic with LocalStorage Persistence
-            const toggleBtn = document.getElementById("toggle-theme");
-            if (toggleBtn) {
-                const isDark = localStorage.getItem("theme") === "dark";
-                if (isDark) {
-                    document.body.classList.add("dark-mode");
-                    const icon = toggleBtn.querySelector("i");
-                    const label = toggleBtn.querySelector("span");
-                    if (icon) icon.className = "fas fa-sun";
-                    if (label) label.textContent = "Light Mode";
-                }
+            // Restore theme preference
+            const savedTheme = localStorage.getItem("theme");
+            if (savedTheme === "dark") {
+                document.body.classList.add("dark-mode");
+                updateThemeIcons(true);
+            }
 
-                toggleBtn.addEventListener("click", () => {
-                    document.body.classList.toggle("dark-mode");
-                    const darkActive = document.body.classList.contains("dark-mode");
-                    localStorage.setItem("theme", darkActive ? "dark" : "light");
-                    const icon = toggleBtn.querySelector("i");
-                    const label = toggleBtn.querySelector("span");
-                    if (icon) icon.className = darkActive ? "fas fa-sun" : "fas fa-moon";
-                    if (label) label.textContent = darkActive ? "Light Mode" : "Dark Mode";
-                });
+            const headerThemeBtn = document.getElementById("toggle-theme");
+            if (headerThemeBtn) {
+                headerThemeBtn.addEventListener("click", toggleTheme);
             }
 
             // Shrink Header on Scroll
             const header = document.getElementById("header");
             if (header) {
                 window.addEventListener("scroll", () => {
-                    if (window.scrollY > 30) {
+                    if (window.scrollY > 25) {
                         header.classList.add("shrink");
                     } else {
                         header.classList.remove("shrink");

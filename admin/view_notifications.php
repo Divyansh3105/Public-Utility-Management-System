@@ -157,13 +157,12 @@ $statRes = $conn->query("
 if ($statRes) $stats = $statRes->fetch_assoc();
 
 $csrf_token = generate_csrf_token();
+$active_page = 'notifications';
+$page_title = 'Notification Logs - Public Utility System';
 ?>
 <?php include('../includes/header.php'); ?>
 
-<div class="dashboard-layout" style="display: flex; gap: 20px;">
-    <?php include('../includes/sidebar_admin.php'); ?>
-
-    <div class="dashboard-content" style="flex: 1; min-width: 0;">
+<div class="dashboard-content">
         <?= display_flash_msg($msg, $msg_type) ?>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">

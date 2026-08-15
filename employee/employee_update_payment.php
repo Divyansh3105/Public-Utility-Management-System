@@ -65,8 +65,8 @@ $water_stmt->execute();
 $water_result = $water_stmt->get_result();
 while ($row = $water_result->fetch_assoc()) $unpaid_bills[] = $row;
 $water_stmt->close();
-
 $csrf_token = generate_csrf_token();
+$active_page = 'update_payment';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -79,79 +79,232 @@ $csrf_token = generate_csrf_token();
     <link rel="stylesheet" href="../assets/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        .pagination {
-            width: 100%;
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            margin-top: 20px;
-            flex-wrap: wrap;
-            gap: 8px;
+        .custom-file-upload {
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .pagination .page-btn {
+        .custom-file-upload:hover {
+            border-color: #764ba2;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        body.dark-mode .file-info {
+            background: #2b2b3c;
+        }
+
+        .bill-details-card {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f3ff 100%);
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        body.dark-mode .bill-details-card {
+            background: linear-gradient(135deg, #1e1e2e 0%, #252538 100%);
+            border-color: #818cf8;
+        }
+
+        .bill-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .bill-detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bill-detail-item label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        body.dark-mode .bill-detail-item label {
+            color: #a0a0a0;
+        }
+
+        .bill-detail-item span {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        body.dark-mode .bill-detail-item span {
+            color: #f1f1f1;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        body.dark-mode .pagination button {
+            background: #2b2b3c;
+            border-color: #444;
+            color: #f1f1f1;
+        }
+
+        .pagination button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .pagination button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .receipt-card {
+            background: #ffffff;
+            border: 1px solid #e0e7ff;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.08);
+            border-left: 5px solid #10b981;
+        }
+
+        body.dark-mode .receipt-card {
+            background: #1e1e2d;
+            border-color: #2e2e42;
+        }
+
+        .receipt-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .receipt-actions .btn {
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            border-radius: 8px;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 12px;
-            border-radius: 12px;
-            min-width: 44px;
-            justify-content: center;
-            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-pdf {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-pdf:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
+        }
+
+        .btn-print {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-print:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(99, 102, 241, 0.45);
+        }
+
+        .notification-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 600;
-            background: transparent;
-            color: #333;
-            border: 2px solid transparent;
-            transition: all 0.25s ease;
+            margin-top: 10px;
+            margin-right: 8px;
         }
 
-        body.dark-mode .pagination .page-btn {
-            color: #e8e8e8;
+        .pill-email {
+            background: #e0e7ff;
+            color: #4338ca;
         }
 
-        .pagination .page-btn:not(.active) {
-            background: rgba(255, 255, 255, 0.9);
-            border: 2px solid rgba(102, 126, 234, 0.15);
+        .pill-sms {
+            background: #dcfce7;
+            color: #15803d;
         }
 
-        body.dark-mode .pagination .page-btn:not(.active) {
-            background: rgba(43, 43, 60, 0.6);
-            border-color: rgba(102, 126, 234, 0.1);
+        body.dark-mode .pill-email {
+            background: #312e81;
+            color: #a5b4fc;
         }
 
-        .pagination .page-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff !important;
-            box-shadow: 0 8px 24px rgba(118, 75, 162, 0.18);
-        }
-
-        .pagination .page-btn:hover:not(.active) {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.18);
+        body.dark-mode .pill-sms {
+            background: #14532d;
+            color: #86efac;
         }
     </style>
 </head>
 
 <body>
-    <header class="dashboard-header" id="header">
-        <div class="header-left">
-            <h1><i class="fas fa-credit-card"></i> Update Payment</h1>
-            <p>Record bill payments and update status</p>
-        </div>
-        <div class="header-actions">
-            <button id="toggle-theme" class="btn-icon">
-                <i class="fas fa-moon"></i><span>Dark Mode</span>
-            </button>
-            <a href="dashboard_employee.php" class="btn-icon">
-                <i class="fas fa-arrow-left"></i><span>Back</span>
-            </a>
-            <a href="../logout.php" class="btn-icon logout">
-                <i class="fas fa-right-from-bracket"></i><span>Logout</span>
-            </a>
-        </div>
-    </header>
+    <div class="dashboard-layout">
+        <?php include('../includes/sidebar_employee.php'); ?>
 
-    <div class="dashboard-content">
+        <div class="main-content">
+            <header class="dashboard-header" id="header">
+                <div class="header-left">
+                    <button class="sidebar-mobile-toggle" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="header-title-block">
+                        <h1><i class="fas fa-credit-card"></i> Update Payment</h1>
+                        <p>Record bill payments and update status</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="toggle-theme" class="btn-icon">
+                        <i class="fas fa-moon"></i><span>Dark Mode</span>
+                    </button>
+                    <a href="dashboard_employee.php" class="btn-icon">
+                        <i class="fas fa-arrow-left"></i><span>Dashboard</span>
+                    </a>
+                    <a href="../logout.php" class="btn-icon logout">
+                        <i class="fas fa-right-from-bracket"></i><span>Logout</span>
+                    </a>
+                </div>
+            </header>
+
+            <div class="dashboard-content">
         <?= display_flash_msg($toast ?? $msg ?? null, $toast_type ?? $msg_type ?? "success") ?>
 
         <h2 class="section-header"><i class="fas fa-money-bill-wave"></i> Payment Form</h2>
@@ -379,7 +532,7 @@ $csrf_token = generate_csrf_token();
             });
         });
     </script>
+        </div> <!-- close .main-content -->
+    </div> <!-- close .dashboard-layout -->
 
-</body>
-
-</html>
+    <?php include('../includes/footer.php'); ?>

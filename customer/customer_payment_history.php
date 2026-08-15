@@ -66,6 +66,7 @@ while ($row = $result->fetch_assoc()) {
     $monthly_payments[$month] += $row['Amount_Paid'];
 }
 $result->data_seek(0);
+$active_page = 'history';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -77,334 +78,37 @@ $result->data_seek(0);
     <title>Payment History - <?php echo $customer_name; ?></title>
     <link rel="stylesheet" href="../assets/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
-
-        body.dark-mode {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        }
-
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        body.dark-mode .container {
-            background: #2b2b3c;
-            color: #f1f1f1;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .header h1 {
-            font-size: 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        body.dark-mode .header h1 {
-            background: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 15px;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 10px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-        }
-
-        .btn-back {
-            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-            color: white;
-        }
-
-        .btn-back:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
-        }
-
-        .btn-theme {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-theme:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        /* Summary Cards */
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-
-        .summary-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
-            transition: transform 0.3s ease;
-        }
-
-        .summary-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .summary-card:nth-child(2) {
-            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
-        }
-
-        .summary-card:nth-child(3) {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .summary-card:nth-child(4) {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-        }
-
-        .summary-card h3 {
-            font-size: 16px;
-            margin-bottom: 12px;
-            opacity: 0.9;
-            font-weight: 500;
-        }
-
-        .summary-card .value {
-            font-size: 36px;
-            font-weight: 700;
-        }
-
-        /* Filter Section */
-        .filter-section {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        body.dark-mode .filter-section {
-            background: #1e1e2e;
-        }
-
-        .filter-section input,
-        .filter-section select {
-            padding: 10px 15px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        body.dark-mode .filter-section input,
-        body.dark-mode .filter-section select {
-            background: #2b2b3c;
-            border-color: #3a3a4a;
-            color: #f1f1f1;
-        }
-
-        .filter-section input:focus,
-        .filter-section select:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        /* Table */
-        .table-container {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        body.dark-mode .table-container {
-            background: #1e1e2e;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        table thead {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        table th {
-            color: white;
-            padding: 18px 15px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 14px;
-            white-space: nowrap;
-        }
-
-        table td {
-            padding: 16px 15px;
-            border-bottom: 1px solid #f0f0f0;
-            color: #333;
-        }
-
-        body.dark-mode table td {
-            border-bottom-color: #3a3a4a;
-            color: #e0e0e0;
-        }
-
-        table tr:last-child td {
-            border-bottom: none;
-        }
-
-        table tr:hover {
-            background: #f8f9ff;
-        }
-
-        body.dark-mode table tr:hover {
-            background: #323244;
-        }
-
-        .mode-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .mode-cash {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .mode-online {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .mode-upi {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .mode-card {
-            background: #e2e3e5;
-            color: #383d41;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-        }
-
-        .empty-state i {
-            font-size: 64px;
-            margin-bottom: 20px;
-            opacity: 0.3;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-            }
-
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .summary-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .filter-section {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .table-container {
-                overflow-x: auto;
-            }
-
-            table {
-                min-width: 800px;
-            }
-
-            .header h1 {
-                font-size: 24px;
-            }
-        }
-    </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>
-                <i class="fas fa-history"></i>
-                Payment History - <?php echo $customer_name; ?>
-            </h1>
-            <div class="header-actions">
-                <button id="toggle-theme" class="btn btn-theme">
-                    <i class="fas fa-moon"></i>
-                    Dark Mode
-                </button>
-                <a href="dashboard_customer.php" class="btn btn-back">
-                    <i class="fas fa-arrow-left"></i>
-                    Back to Dashboard
-                </a>
-            </div>
-        </div>
+    <div class="dashboard-layout">
+        <?php include('../includes/sidebar_customer.php'); ?>
 
+        <div class="main-content">
+            <header class="dashboard-header" id="header">
+                <div class="header-left">
+                    <button class="sidebar-mobile-toggle" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="header-title-block">
+                        <h1><i class="fas fa-history"></i> Payment History & Receipts</h1>
+                        <p>Receipts and transaction log for <?php echo $customer_name; ?></p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="toggle-theme" class="btn-icon">
+                        <i class="fas fa-moon"></i><span>Dark Mode</span>
+                    </button>
+                    <a href="dashboard_customer.php" class="btn-icon">
+                        <i class="fas fa-arrow-left"></i><span>Dashboard</span>
+                    </a>
+                    <a href="../logout.php" class="btn-icon logout">
+                        <i class="fas fa-right-from-bracket"></i><span>Logout</span>
+                    </a>
+                </div>
+            </header>
+
+            <div class="dashboard-content">
         <div class="summary-grid">
             <div class="summary-card">
                 <h3><i class="fas fa-rupee-sign"></i> Total Paid</h3>
@@ -506,7 +210,6 @@ $result->data_seek(0);
                 </tbody>
             </table>
         </div>
-    </div>
 
     <script>
         // Dark mode toggle
@@ -569,9 +272,11 @@ $result->data_seek(0);
         filterMode.addEventListener('change', filterTable);
         filterDate.addEventListener('change', filterTable);
     </script>
-</body>
+            </div> <!-- close .dashboard-content -->
+        </div> <!-- close .main-content -->
+    </div> <!-- close .dashboard-layout -->
 
-</html>
+    <?php include('../includes/footer.php'); ?>
 <?php
 $stmt->close();
 ?>

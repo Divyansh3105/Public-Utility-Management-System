@@ -11,6 +11,7 @@ $name = $_SESSION['name'];
 
 // Fetch logs
 $stmt = $conn->prepare("SELECT Action, Description, Log_Time FROM employee_log WHERE Employee_ID = ? ORDER BY Log_Time DESC"); $stmt->bind_param("i", $emp_id); $stmt->execute(); $logs = $stmt->get_result();
+$active_page = 'logs';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -25,25 +26,34 @@ $stmt = $conn->prepare("SELECT Action, Description, Log_Time FROM employee_log W
 </head>
 
 <body>
-    <header class="dashboard-header" id="header">
-        <div class="header-left">
-            <h1><i class="fas fa-clipboard-list"></i> Employee Activity Logs</h1>
-            <p>Your action history and work records</p>
-        </div>
-        <div class="header-actions">
-            <button id="toggle-theme" class="btn-icon">
-                <i class="fas fa-moon"></i><span>Dark Mode</span>
-            </button>
-            <a href="dashboard_employee.php" class="btn-icon">
-                <i class="fas fa-arrow-left"></i><span>Back</span>
-            </a>
-            <a href="../logout.php" class="btn-icon logout">
-                <i class="fas fa-right-from-bracket"></i><span>Logout</span>
-            </a>
-        </div>
-    </header>
+    <div class="dashboard-layout">
+        <?php include('../includes/sidebar_employee.php'); ?>
 
-    <div class="dashboard-content">
+        <div class="main-content">
+            <header class="dashboard-header" id="header">
+                <div class="header-left">
+                    <button class="sidebar-mobile-toggle" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="header-title-block">
+                        <h1><i class="fas fa-clipboard-list"></i> Employee Activity Logs</h1>
+                        <p>Your action history and work records</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="toggle-theme" class="btn-icon">
+                        <i class="fas fa-moon"></i><span>Dark Mode</span>
+                    </button>
+                    <a href="dashboard_employee.php" class="btn-icon">
+                        <i class="fas fa-arrow-left"></i><span>Dashboard</span>
+                    </a>
+                    <a href="../logout.php" class="btn-icon logout">
+                        <i class="fas fa-right-from-bracket"></i><span>Logout</span>
+                    </a>
+                </div>
+            </header>
+
+            <div class="dashboard-content">
         <div class="search-filter">
             <input type="text" id="searchInput" placeholder="🔍 Search logs...">
         </div>
@@ -112,6 +122,8 @@ $stmt = $conn->prepare("SELECT Action, Description, Log_Time FROM employee_log W
             });
         });
     </script>
-</body>
+            </div> <!-- close .dashboard-content -->
+        </div> <!-- close .main-content -->
+    </div> <!-- close .dashboard-layout -->
 
-</html>
+    <?php include('../includes/footer.php'); ?>

@@ -27,20 +27,39 @@ $base = defined("BASE_URL") ? BASE_URL : "/Public_Utility_Management_System/";
     </script>
 </head>
 <body>
-    <header class="dashboard-header" id="header">
-        <div class="header-left">
-            <h1><i class="fas fa-shield-halved"></i> <?= htmlspecialchars($page_title) ?></h1>
-            <p>Public Utility Management System &bull; Welcome, <?= htmlspecialchars($user_name) ?> (<?= ucfirst($role) ?>)</p>
-        </div>
-        <div class="header-actions">
-            <button id="toggle-theme" class="btn-icon" type="button" aria-label="Toggle Dark Mode">
-                <i class="fas fa-moon"></i>
-                <span>Dark Mode</span>
-            </button>
-            <a href="<?= $base ?>profile.php" class="btn-icon" style="background:linear-gradient(135deg,#3b82f6,#0284c7);"><i class="fas fa-user-gear"></i><span>Profile</span></a>
-            <a href="<?= $base ?>logout.php" class="btn-icon logout">
-                <i class="fas fa-right-from-bracket"></i>
-                <span>Logout</span>
-            </a>
-        </div>
-    </header>
+    <div class="dashboard-layout">
+        <?php
+        if ($role === 'admin') {
+            include(__DIR__ . '/sidebar_admin.php');
+        } elseif ($role === 'employee') {
+            include(__DIR__ . '/sidebar_employee.php');
+        } elseif ($role === 'customer') {
+            include(__DIR__ . '/sidebar_customer.php');
+        }
+        ?>
+
+        <div class="main-content">
+            <header class="dashboard-header" id="header">
+                <div class="header-left">
+                    <button class="sidebar-mobile-toggle" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="header-title-block">
+                        <h1><?= htmlspecialchars($page_title) ?></h1>
+                        <p>Public Utility Management System &bull; Welcome, <?= htmlspecialchars($user_name) ?> (<?= ucfirst($role) ?>)</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="toggle-theme" class="btn-icon" type="button" aria-label="Toggle Dark Mode">
+                        <i class="fas fa-moon"></i>
+                        <span>Dark Mode</span>
+                    </button>
+                    <a href="<?= $base ?>profile.php" class="btn-icon" style="background:linear-gradient(135deg,#3b82f6,#0284c7);">
+                        <i class="fas fa-user-gear"></i><span>Profile</span>
+                    </a>
+                    <a href="<?= $base ?>logout.php" class="btn-icon logout">
+                        <i class="fas fa-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </header>

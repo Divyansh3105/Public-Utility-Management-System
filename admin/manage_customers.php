@@ -1,6 +1,7 @@
 <?php
 include('../includes/db_connect.php');
 include('activity_log.php');
+require_once('../includes/tariff_engine.php');
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
     redirect('index.php');
@@ -12,6 +13,9 @@ $pagination = get_pagination_params(50);
 $page = $pagination['page'];
 $limit = $pagination['limit'];
 $offset = $pagination['offset'];
+
+// Fetch tariff categories for dropdowns
+$tariff_categories = getTariffCategories($conn);
 
 // DELETE
 if (isset($_POST['confirm_delete']) && isset($_POST['csrf_token'])) {
@@ -58,6 +62,7 @@ if (isset($_POST['add_customer']) && isset($_POST['csrf_token'])) {
         $name = sanitize_input($_POST['name']);
         $phone = sanitize_input($_POST['phone']);
         $email = sanitize_input($_POST['email']);
+        $tariff_cat_id = intval($_POST['tariff_category_id'] ?? 1);
         $password = hash_password($_POST['password']);
 
         if (!validate_phone($phone)) {
@@ -72,8 +77,8 @@ if (isset($_POST['add_customer']) && isset($_POST['csrf_token'])) {
 
             if ($house_stmt->execute()) {
                 $house_id = $conn->insert_id;
-                $cust_stmt = $conn->prepare("INSERT INTO customer (Name, Phone, Email, Password, House_ID) VALUES (?, ?, ?, ?, ?)");
-                $cust_stmt->bind_param("ssssi", $name, $phone, $email, $password, $house_id);
+                $cust_stmt = $conn->prepare("INSERT INTO customer (Name, Phone, Email, Password, House_ID, Tariff_Category_ID) VALUES (?, ?, ?, ?, ?, ?)");
+                $cust_stmt->bind_param("ssssii", $name, $phone, $email, $password, $house_id, $tariff_cat_id);
 
                 if ($cust_stmt->execute()) {
                     $toast = "Customer and House added successfully!";
@@ -100,6 +105,7 @@ if (isset($_POST['edit_customer']) && isset($_POST['csrf_token'])) {
         $name = sanitize_input($_POST['name']);
         $phone = sanitize_input($_POST['phone']);
         $email = sanitize_input($_POST['email']);
+        $tariff_cat_id = intval($_POST['tariff_category_id'] ?? 1);
         $house_number = sanitize_input($_POST['house_number']);
         $owner_name = sanitize_input($_POST['owner_name']);
         $address = sanitize_input($_POST['address']);
@@ -116,8 +122,8 @@ if (isset($_POST['edit_customer']) && isset($_POST['csrf_token'])) {
             $h_ok = $hstmt->execute();
             $hstmt->close();
 
-            $cstmt = $conn->prepare("UPDATE customer SET Name=?, Phone=?, Email=? WHERE Customer_ID=?");
-            $cstmt->bind_param("sssi", $name, $phone, $email, $customer_id);
+            $cstmt = $conn->prepare("UPDATE customer SET Name=?, Phone=?, Email=?, Tariff_Category_ID=? WHERE Customer_ID=?");
+            $cstmt->bind_param("sssii", $name, $phone, $email, $tariff_cat_id, $customer_id);
             $c_ok = $cstmt->execute();
             $cstmt->close();
 
@@ -144,14 +150,18 @@ $active_bills = $conn->query("
 
 $total_pages = max(1, ceil($total_customers / $limit));
 
-$sql = "SELECT c.Customer_ID, c.Name, c.Phone, c.Email, c.Password, c.House_ID,
-               h.House_Number, h.Owner_Name, h.Address
+$sql = "SELECT c.Customer_ID, c.Name, c.Phone, c.Email, c.Password, c.House_ID, c.Tariff_Category_ID,
+               h.House_Number, h.Owner_Name, h.Address,
+               COALESCE(tc.category_name, 'Domestic') as category_name,
+               COALESCE(tc.category_code, 'DOMESTIC') as category_code
         FROM customer c
         LEFT JOIN house h ON c.House_ID = h.House_ID
+        LEFT JOIN tariff_categories tc ON c.Tariff_Category_ID = tc.category_id
         ORDER BY c.Customer_ID ASC
         LIMIT $limit OFFSET $offset";
 $result = $conn->query($sql);
 $csrf_token = generate_csrf_token();
+$active_page = 'customers';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -171,7 +181,6 @@ $csrf_token = generate_csrf_token();
             align-items: center !important;
             margin-top: 20px;
             flex-wrap: wrap;
-            text-align: center;
             gap: 8px;
         }
 
@@ -189,31 +198,22 @@ $csrf_token = generate_csrf_token();
             color: #333;
             border: 2px solid transparent;
             transition: all 0.25s ease;
-            box-shadow: none;
         }
 
         body.dark-mode .pagination .page-btn {
             color: #e8e8e8;
         }
 
-        .pagination .page-btn i {
-            font-size: 14px;
-        }
-
-        /* outlined buttons */
         .pagination .page-btn:not(.active) {
             background: rgba(255, 255, 255, 0.9);
             border: 2px solid rgba(102, 126, 234, 0.15);
-            color: #333;
         }
 
         body.dark-mode .pagination .page-btn:not(.active) {
             background: rgba(43, 43, 60, 0.6);
             border-color: rgba(102, 126, 234, 0.1);
-            color: #e8e8e8;
         }
 
-        /* active (filled gradient) */
         .pagination .page-btn.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #fff !important;
@@ -221,56 +221,49 @@ $csrf_token = generate_csrf_token();
             box-shadow: 0 8px 24px rgba(118, 75, 162, 0.18);
         }
 
-        /* hover effects */
         .pagination .page-btn:not(.active):hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 20px rgba(102, 126, 234, 0.18);
             border-color: rgba(118, 75, 162, 0.18);
         }
-
-        .pagination .page-btn:active {
-            transform: translateY(0);
-        }
-
-        /* smaller screens adjustments */
-        @media (max-width: 480px) {
-            .pagination .page-btn {
-                padding: 6px 10px;
-                min-width: 38px;
-                font-size: 14px;
-            }
-        }
     </style>
 </head>
 
 <body>
-    <!-- Fixed Header -->
-    <header class="dashboard-header" id="header">
-        <div class="header-left">
-            <h1>
-                <i class="fas fa-users"></i>
-                Customer Management
-            </h1>
-            <p>Add, view, and manage customers and their linked houses</p>
-        </div>
-        <div class="header-actions">
-            <button id="toggle-theme" class="btn-icon">
-                <i class="fas fa-moon"></i>
-                <span>Dark Mode</span>
-            </button>
-            <a href="dashboard_admin.php" class="btn-icon">
-                <i class="fas fa-arrow-left"></i>
-                <span>Back</span>
-            </a>
-            <a href="../logout.php" class="btn-icon logout">
-                <i class="fas fa-right-from-bracket"></i>
-                <span>Logout</span>
-            </a>
-        </div>
-    </header>
+    <div class="dashboard-layout">
+        <?php include('../includes/sidebar_admin.php'); ?>
 
-    <!-- Main Content -->
-    <div class="dashboard-content">
+        <div class="main-content">
+            <header class="dashboard-header" id="header">
+                <div class="header-left">
+                    <button class="sidebar-mobile-toggle" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="header-title-block">
+                        <h1>
+                            <i class="fas fa-users"></i>
+                            Customer Management
+                        </h1>
+                        <p>Add, view, and manage customers and their linked houses</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="toggle-theme" class="btn-icon">
+                        <i class="fas fa-moon"></i>
+                        <span>Dark Mode</span>
+                    </button>
+                    <a href="dashboard_admin.php" class="btn-icon">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="../logout.php" class="btn-icon logout">
+                        <i class="fas fa-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </header>
+
+            <div class="dashboard-content">
 
         <?= display_flash_msg($toast ?? $msg ?? null, $toast_type ?? $msg_type ?? "success") ?>
 
@@ -302,8 +295,7 @@ $csrf_token = generate_csrf_token();
         </div>
 
         <h2 class="section-header">
-            <i class="fas fa-list"></i>
-            Customer List
+            <i class="fas fa-list"></i> Customer Directory
         </h2>
 
         <div class="table-container">
@@ -314,6 +306,7 @@ $csrf_token = generate_csrf_token();
                         <th>Name</th>
                         <th>Phone</th>
                         <th>Email</th>
+                        <th>Tariff Plan</th>
                         <th>House ID</th>
                         <th>Action</th>
                     </tr>
@@ -326,10 +319,15 @@ $csrf_token = generate_csrf_token();
                                 <td><?= htmlspecialchars($row['Name']) ?></td>
                                 <td><?= htmlspecialchars($row['Phone']) ?></td>
                                 <td><?= htmlspecialchars($row['Email']) ?></td>
+                                <td>
+                                    <span class="badge badge-primary">
+                                        <i class="fas fa-layer-group"></i> <?= htmlspecialchars($row['category_name']) ?>
+                                    </span>
+                                </td>
                                 <td>#<?= htmlspecialchars($row['House_ID']) ?></td>
                                 <td>
                                     <button class="btn btn-primary" style="padding: 8px 12px; margin-right: 5px;"
-                                        onclick='openEditModal(<?= json_encode($row["Customer_ID"]) ?>, <?= json_encode($row["Name"]) ?>, <?= json_encode($row["Phone"]) ?>, <?= json_encode($row["Email"]) ?>, <?= json_encode($row["House_ID"]) ?>, <?= json_encode($row["House_Number"]) ?>, <?= json_encode($row["Owner_Name"]) ?>, <?= json_encode($row["Address"]) ?>, <?= json_encode($row["Password"]) ?>)'>
+                                        onclick='openEditModal(<?= json_encode($row["Customer_ID"]) ?>, <?= json_encode($row["Name"]) ?>, <?= json_encode($row["Phone"]) ?>, <?= json_encode($row["Email"]) ?>, <?= json_encode($row["House_ID"]) ?>, <?= json_encode($row["House_Number"]) ?>, <?= json_encode($row["Owner_Name"]) ?>, <?= json_encode($row["Address"]) ?>, <?= json_encode($row["Password"]) ?>, <?= json_encode($row["Tariff_Category_ID"] ?? 1) ?>)'>
                                         <i class="fas fa-edit"></i> Edit
                                     </button>
                                     <button class="btn btn-danger" style="padding: 8px 12px;"
@@ -341,7 +339,7 @@ $csrf_token = generate_csrf_token();
                         <?php endwhile; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6">
+                            <td colspan="7">
                                 <div class="empty-state">
                                     <i class="fas fa-users"></i>
                                     <p>No customers yet</p>
@@ -381,6 +379,7 @@ $csrf_token = generate_csrf_token();
         <?php endif; ?>
 
     </div>
+
     <!-- ADD MODAL -->
     <div id="addModal" class="modal">
         <div class="modal-content">
@@ -409,7 +408,7 @@ $csrf_token = generate_csrf_token();
                 </div>
 
                 <h3 style="color: #667eea; margin: 20px 0 15px 0; font-size: 18px;">
-                    <i class="fas fa-user"></i> Customer Details
+                    <i class="fas fa-user"></i> Customer & Tariff Details
                 </h3>
                 <div class="form-grid">
                     <div class="form-group">
@@ -423,6 +422,14 @@ $csrf_token = generate_csrf_token();
                     <div class="form-group">
                         <label>Email</label>
                         <input type="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tariff Plan Category</label>
+                        <select name="tariff_category_id" class="form-control" required>
+                            <?php foreach ($tariff_categories as $tcat): ?>
+                                <option value="<?= $tcat['category_id'] ?>"><?= htmlspecialchars($tcat['category_name']) ?> (<?= htmlspecialchars($tcat['category_code']) ?>)</option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Password</label>
@@ -472,7 +479,7 @@ $csrf_token = generate_csrf_token();
                 </div>
 
                 <h3 style="color: #667eea; margin: 20px 0 15px 0; font-size: 18px;">
-                    <i class="fas fa-user"></i> Customer Details
+                    <i class="fas fa-user"></i> Customer & Tariff Details
                 </h3>
                 <div class="form-grid">
                     <div class="form-group">
@@ -486,6 +493,14 @@ $csrf_token = generate_csrf_token();
                     <div class="form-group">
                         <label>Email</label>
                         <input type="email" name="email" id="edit_email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tariff Plan Category</label>
+                        <select name="tariff_category_id" id="edit_tariff_category_id" class="form-control" required>
+                            <?php foreach ($tariff_categories as $tcat): ?>
+                                <option value="<?= $tcat['category_id'] ?>"><?= htmlspecialchars($tcat['category_name']) ?> (<?= htmlspecialchars($tcat['category_code']) ?>)</option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Password (Read-only)</label>
@@ -573,7 +588,7 @@ $csrf_token = generate_csrf_token();
             document.body.style.overflow = 'auto';
         }
 
-        function openEditModal(cId, name, phone, email, hId, hNum, owner, addr, pwd) {
+        function openEditModal(cId, name, phone, email, hId, hNum, owner, addr, pwd, tariffCatId) {
             document.getElementById('edit_customer_id').value = cId;
             document.getElementById('edit_house_id').value = hId;
             document.getElementById('edit_house_number').value = hNum;
@@ -583,6 +598,9 @@ $csrf_token = generate_csrf_token();
             document.getElementById('edit_phone').value = phone;
             document.getElementById('edit_email').value = email;
             document.getElementById('edit_password').value = pwd;
+            if (document.getElementById('edit_tariff_category_id')) {
+                document.getElementById('edit_tariff_category_id').value = tariffCatId || 1;
+            }
             document.getElementById('editModal').style.display = 'block';
             document.body.style.overflow = 'hidden';
         }
@@ -652,18 +670,16 @@ $csrf_token = generate_csrf_token();
             rows.forEach(r => tbody.appendChild(r));
         }
 
-        sortSelect.addEventListener("change", function() {
-            const selected = this.value;
-            localStorage.setItem("employeeSort", selected);
-            sortTable(selected);
-        });
-
-        window.addEventListener("DOMContentLoaded", () => {
-            const savedSort = localStorage.getItem("employeeSort") || "id-asc";
-            sortSelect.value = savedSort;
-            sortTable(savedSort);
-        });
+        if (sortSelect) {
+            sortSelect.addEventListener("change", function() {
+                const selected = this.value;
+                localStorage.setItem("customerSort", selected);
+                sortTable(selected);
+            });
+        }
     </script>
-</body>
+            </div> <!-- close .dashboard-content -->
+        </div> <!-- close .main-content -->
+    </div> <!-- close .dashboard-layout -->
 
-</html>
+    <?php include('../includes/footer.php'); ?>

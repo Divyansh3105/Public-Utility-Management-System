@@ -38,6 +38,7 @@ if (isset($_POST['export_csv']) && verify_csrf_token($_POST['csrf_token'] ?? '')
     fclose($output);
     exit;
 }
+$active_page = 'reports';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -53,25 +54,34 @@ if (isset($_POST['export_csv']) && verify_csrf_token($_POST['csrf_token'] ?? '')
 </head>
 
 <body>
-    <header class="dashboard-header" id="header">
-        <div class="header-left">
-            <h1><i class="fas fa-chart-bar"></i> Reports & Analytics</h1>
-            <p>View payment trends and generate reports</p>
-        </div>
-        <div class="header-actions">
-            <button id="toggle-theme" class="btn-icon">
-                <i class="fas fa-moon"></i><span>Dark Mode</span>
-            </button>
-            <a href="dashboard_employee.php" class="btn-icon">
-                <i class="fas fa-arrow-left"></i><span>Back</span>
-            </a>
-            <a href="../logout.php" class="btn-icon logout">
-                <i class="fas fa-right-from-bracket"></i><span>Logout</span>
-            </a>
-        </div>
-    </header>
+    <div class="dashboard-layout">
+        <?php include('../includes/sidebar_employee.php'); ?>
 
-    <div class="dashboard-content">
+        <div class="main-content">
+            <header class="dashboard-header" id="header">
+                <div class="header-left">
+                    <button class="sidebar-mobile-toggle" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="header-title-block">
+                        <h1><i class="fas fa-chart-bar"></i> Reports & Analytics</h1>
+                        <p>View payment trends and generate reports</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button id="toggle-theme" class="btn-icon">
+                        <i class="fas fa-moon"></i><span>Dark Mode</span>
+                    </button>
+                    <a href="dashboard_employee.php" class="btn-icon">
+                        <i class="fas fa-arrow-left"></i><span>Dashboard</span>
+                    </a>
+                    <a href="../logout.php" class="btn-icon logout">
+                        <i class="fas fa-right-from-bracket"></i><span>Logout</span>
+                    </a>
+                </div>
+            </header>
+
+            <div class="dashboard-content">
         <h2 class="section-header"><i class="fas fa-chart-line"></i> Yearly Revenue Report</h2>
 
         <div style="background: white; border-radius: 16px; padding: 30px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1); margin-bottom: 30px;">
@@ -178,6 +188,8 @@ if (isset($_POST['export_csv']) && verify_csrf_token($_POST['csrf_token'] ?? '')
             }
         });
     </script>
-</body>
+            </div> <!-- close .dashboard-content -->
+        </div> <!-- close .main-content -->
+    </div> <!-- close .dashboard-layout -->
 
-</html>
+    <?php include('../includes/footer.php'); ?>

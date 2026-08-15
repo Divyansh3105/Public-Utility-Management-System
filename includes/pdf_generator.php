@@ -174,44 +174,81 @@ function generateBillStatementPDF(array $bill, string $dest = 'S', string $filen
     $pdf->SetY(87);
     $pdf->SetFont('Helvetica', 'B', 11);
     $pdf->SetTextColor(30, 41, 59);
-    $pdf->Cell(180, 7, 'Tariff & Consumption Breakdown', 0, 1, 'L');
+    $pdf->Cell(180, 7, 'Tariff & Progressive Consumption Breakdown', 0, 1, 'L');
 
     // Table Header
     $pdf->SetFillColor(79, 70, 229); // Indigo 600
     $pdf->SetTextColor(255, 255, 255);
     $pdf->SetFont('Helvetica', 'B', 9);
-    $pdf->Cell(70, 8, ' Description / Service', 0, 0, 'L', true);
+    $pdf->Cell(70, 8, ' Description / Tariff Slab', 0, 0, 'L', true);
     $pdf->Cell(35, 8, 'Consumption', 0, 0, 'C', true);
     $pdf->Cell(35, 8, 'Tariff Rate (INR)', 0, 0, 'R', true);
     $pdf->Cell(40, 8, 'Amount (INR) ', 0, 1, 'R', true);
 
-    // Table Row
     $isWater = strtolower($bill['Bill_Type'] ?? '') === 'water';
-    $unitLabel = $isWater ? ' Liters' : ' kWh (Units)';
+    $unitLabel = $isWater ? ' Liters' : ' kWh';
     $rateLabel = $isWater ? ' / Liter' : ' / Unit';
-    $desc = $isWater ? 'Domestic Water Utility Consumption' : 'Domestic Electricity Consumption';
 
-    $consumption = floatval($bill['Units_Consumed'] ?? $bill['Consumption_Liters'] ?? $bill['Consumption'] ?? 0);
-    $rate = floatval($bill['Rate_per_unit'] ?? $bill['Rate_per_liter'] ?? $bill['Rate'] ?? 0);
-    $amount = floatval($bill['Bill_Amount'] ?? ($consumption * $rate));
+    $parsed = null;
+    if (!empty($bill['Slab_Breakdown_JSON'])) {
+        $parsed = json_decode($bill['Slab_Breakdown_JSON'], true);
+    }
 
     $pdf->SetFillColor(248, 250, 252);
     $pdf->SetTextColor(51, 65, 85);
     $pdf->SetFont('Helvetica', '', 9);
 
-    $pdf->Cell(70, 9, ' ' . $desc, 'B', 0, 'L', true);
-    $pdf->Cell(35, 9, number_format($consumption, 2) . $unitLabel, 'B', 0, 'C', true);
-    $pdf->Cell(35, 9, 'Rs. ' . number_format($rate, 2) . $rateLabel, 'B', 0, 'R', true);
-    $pdf->SetFont('Helvetica', 'B', 9);
-    $pdf->Cell(40, 9, 'Rs. ' . number_format($amount, 2) . ' ', 'B', 1, 'R', true);
+    if ($parsed && !empty($parsed['slabs'])) {
+        foreach ($parsed['slabs'] as $slab) {
+            $pdf->Cell(70, 8, ' ' . $slab['slab_name'], 'B', 0, 'L', true);
+            $pdf->Cell(35, 8, number_format($slab['units_in_slab'], 2) . $unitLabel, 'B', 0, 'C', true);
+            $pdf->Cell(35, 8, 'Rs. ' . number_format($slab['rate_per_unit'], 2) . $rateLabel, 'B', 0, 'R', true);
+            $pdf->Cell(40, 8, 'Rs. ' . number_format($slab['subtotal'], 2) . ' ', 'B', 1, 'R', true);
+        }
+    } else {
+        $consumption = floatval($bill['Units_Consumed'] ?? $bill['Consumption_Liters'] ?? $bill['Consumption'] ?? 0);
+        $rate = floatval($bill['Rate_per_unit'] ?? $bill['Rate_per_liter'] ?? $bill['Rate'] ?? 0);
+        $baseAmt = floatval($bill['Base_Amount'] ?? ($consumption * $rate));
+        $desc = $isWater ? 'Water Utility Consumption' : 'Electricity Utility Consumption';
 
-    // Additional row for zero fixed charges / taxes for completeness
+        $pdf->Cell(70, 8, ' ' . $desc, 'B', 0, 'L', true);
+        $pdf->Cell(35, 8, number_format($consumption, 2) . $unitLabel, 'B', 0, 'C', true);
+        $pdf->Cell(35, 8, 'Rs. ' . number_format($rate, 2) . $rateLabel, 'B', 0, 'R', true);
+        $pdf->Cell(40, 8, 'Rs. ' . number_format($baseAmt, 2) . ' ', 'B', 1, 'R', true);
+    }
+
+    // Fixed Meter & Tax Line Items
+    $fixedCharge = floatval($bill['Fixed_Charge'] ?? ($parsed['fixed_charge'] ?? 0));
+    $taxAmount = floatval($bill['Tax_Amount'] ?? ($parsed['tax_amount'] ?? 0));
+    $lateFee = floatval($bill['Late_Fee'] ?? ($parsed['late_fee'] ?? 0));
+    $totalBill = floatval($bill['Bill_Amount'] ?? ($parsed['total_amount'] ?? 0));
+
     $pdf->SetFont('Helvetica', '', 8.5);
     $pdf->SetTextColor(100, 116, 139);
-    $pdf->Cell(70, 7, ' Municipal Utility Surcharge & Tax', 'B', 0, 'L', false);
-    $pdf->Cell(35, 7, 'Included', 'B', 0, 'C', false);
-    $pdf->Cell(35, 7, '0.00', 'B', 0, 'R', false);
-    $pdf->Cell(40, 7, 'Rs. 0.00 ', 'B', 1, 'R', false);
+
+    if ($fixedCharge > 0) {
+        $pdf->Cell(70, 6.5, ' Fixed Meter / Service Maintenance Charge', 'B', 0, 'L', false);
+        $pdf->Cell(35, 6.5, 'Monthly Fixed', 'B', 0, 'C', false);
+        $pdf->Cell(35, 6.5, 'Fixed', 'B', 0, 'R', false);
+        $pdf->Cell(40, 6.5, 'Rs. ' . number_format($fixedCharge, 2) . ' ', 'B', 1, 'R', false);
+    }
+
+    if ($taxAmount > 0) {
+        $taxPct = $parsed['tax_percent'] ?? 5.00;
+        $pdf->Cell(70, 6.5, ' Electricity Duty & Municipal Cess (' . number_format($taxPct, 1) . '%)', 'B', 0, 'L', false);
+        $pdf->Cell(35, 6.5, 'Statutory', 'B', 0, 'C', false);
+        $pdf->Cell(35, 6.5, number_format($taxPct, 1) . '%', 'B', 0, 'R', false);
+        $pdf->Cell(40, 6.5, 'Rs. ' . number_format($taxAmount, 2) . ' ', 'B', 1, 'R', false);
+    }
+
+    if ($lateFee > 0) {
+        $pdf->SetTextColor(225, 29, 72);
+        $pdf->SetFont('Helvetica', 'B', 8.5);
+        $pdf->Cell(70, 6.5, ' Overdue Late Fee Surcharge Penalty', 'B', 0, 'L', false);
+        $pdf->Cell(35, 6.5, 'Past Grace Date', 'B', 0, 'C', false);
+        $pdf->Cell(35, 6.5, 'Penalty', 'B', 0, 'R', false);
+        $pdf->Cell(40, 6.5, '+ Rs. ' . number_format($lateFee, 2) . ' ', 'B', 1, 'R', false);
+    }
 
     // Total Amount Row
     $pdf->SetY($pdf->GetY() + 4);
@@ -223,12 +260,12 @@ function generateBillStatementPDF(array $bill, string $dest = 'S', string $filen
     $pdf->SetTextColor(79, 70, 229);
     $pdf->Cell(40, 5, 'TOTAL AMOUNT DUE:', 0, 0, 'L');
     $pdf->SetFont('Helvetica', 'B', 13);
-    $pdf->Cell(45, 5, 'Rs. ' . number_format($amount, 2), 0, 1, 'R');
+    $pdf->Cell(45, 5, 'Rs. ' . number_format($totalBill, 2), 0, 1, 'R');
 
     $pdf->SetX(105);
     $pdf->SetFont('Helvetica', '', 8);
     $pdf->SetTextColor(100, 116, 139);
-    $pdf->Cell(85, 4, 'Pay on or before ' . $dueDate . ' to avoid late fee.', 0, 1, 'L');
+    $pdf->Cell(85, 4, 'Pay on or before ' . $dueDate . ' to avoid late surcharge.', 0, 1, 'L');
 
     // 3. Payment Instructions & QR Card
     $pdf->SetY(145);
