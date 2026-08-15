@@ -23,6 +23,12 @@ $active = $active_page ?? "";
         <li class="<?= $active === "payments" ? "active" : "" ?>">
             <a href="<?= $base ?>admin/view_payments.php"><i class="fas fa-money-check-alt"></i> View Payments</a>
         </li>
+        <li class="<?= $active === "notification_logs" ? "active" : "" ?>">
+            <a href="<?= $base ?>admin/view_notifications.php"><i class="fas fa-tower-cell"></i> Notification Logs</a>
+        </li>
+        <li class="<?= $active === "notification_settings" ? "active" : "" ?>">
+            <a href="<?= $base ?>admin/notification_settings.php"><i class="fas fa-sliders"></i> Notification Engine</a>
+        </li>
         <li class="<?= $active === "logs" ? "active" : "" ?>">
             <a href="<?= $base ?>admin/view_logs.php"><i class="fas fa-clipboard-list"></i> Activity Logs</a>
         </li>

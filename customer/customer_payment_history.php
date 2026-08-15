@@ -454,6 +454,7 @@ $result->data_seek(0);
                         <th>Date</th>
                         <th>Mode</th>
                         <th>Details</th>
+                        <th style="text-align: right;">Receipt</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -480,11 +481,21 @@ $result->data_seek(0);
                                         -
                                     <?php endif; ?>
                                 </td>
+                                <td style="text-align: right;">
+                                    <div style="display: flex; justify-content: flex-end; gap: 6px;">
+                                        <a href="../download_pdf.php?type=receipt&id=<?= $row['Payment_ID'] ?>" class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="Download PDF Receipt">
+                                            <i class="fas fa-file-pdf" style="color: #ef4444;"></i> PDF
+                                        </a>
+                                        <a href="../print_receipt.php?payment_id=<?= $row['Payment_ID'] ?>" target="_blank" class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px; text-decoration: none;" title="Print Receipt">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                    </div>
+                                </td>
                             </tr>
                         <?php endwhile; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="8">
+                            <td colspan="9">
                                 <div class="empty-state">
                                     <i class="fas fa-receipt"></i>
                                     <p>No payment history found</p>

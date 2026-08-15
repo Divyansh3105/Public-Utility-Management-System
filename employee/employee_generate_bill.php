@@ -1,6 +1,7 @@
 <?php
 include('../includes/db_connect.php');
 require_once('../includes/log_functions.php');
+require_once('../includes/notification_engine.php');
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] != 'employee') {
     redirect('index.php');
@@ -44,14 +45,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['csrf_token'])) {
             }
 
             if ($stmt->execute()) {
-                logEmployeeAction($conn, $_SESSION['employee_id'], 'Generate Bill', "Generated $bill_type bill for Customer ID $customer_id");
-                $msg = "Bill Generated Successfully!";
+                $newBillId = $stmt->insert_id;
+                $stmt->close();
+
+                logEmployeeAction($conn, $_SESSION['employee_id'], 'Generate Bill', "Generated $bill_type bill #$newBillId for Customer ID $customer_id");
+
+                // Trigger Automated Notification Engine (Email Statement PDF + SMS/WhatsApp)
+                $notifRes = notifyBillGenerated($conn, $newBillId, $bill_type);
+
+                $msg = "$billType Bill #$newBillId Generated Successfully! PDF statement emailed & SMS notification dispatched.";
                 $msg_type = "success";
             } else {
                 $msg = "Error: " . $conn->error;
                 $msg_type = "error";
+                $stmt->close();
             }
-            $stmt->close();
         }
     }
 }

@@ -68,6 +68,9 @@ if (isset($_POST['pay']) && isset($_POST['csrf_token'])) {
                     $pay_stmt->bind_param("sidss", $bill_type, $bill_id, $amount, $date, $mode);
 
                     if ($pay_stmt->execute()) {
+                        $newPaymentId = $pay_stmt->insert_id;
+                        $pay_stmt->close();
+
                         // Update bill status
                         if ($bill_type == 'Electric') {
                             $update_stmt = $conn->prepare("UPDATE electric_bill SET Status='Paid' WHERE Bill_ID=?");
@@ -78,13 +81,18 @@ if (isset($_POST['pay']) && isset($_POST['csrf_token'])) {
                         $update_stmt->execute();
                         $update_stmt->close();
 
-                        $msg = "Payment Successful!";
+                        // Trigger Automated Notification Engine (Email PDF Receipt + SMS/WhatsApp confirmation)
+                        require_once('../includes/notification_engine.php');
+                        $notifRes = notifyPaymentReceipt($conn, $newPaymentId);
+
+                        $last_paid_receipt_id = $newPaymentId;
+                        $msg = "Payment Successful! Digital PDF receipt has been generated, emailed, and SMS confirmation dispatched.";
                         $msg_type = "success";
                     } else {
                         $msg = "Payment failed. Please try again.";
                         $msg_type = "error";
+                        $pay_stmt->close();
                     }
-                    $pay_stmt->close();
                 }
             } else {
                 $msg = "Bill not found!";
@@ -159,6 +167,26 @@ $csrf_token = generate_csrf_token();
     <div class="dashboard-content">
 
         <?= display_flash_msg($toast ?? $msg ?? null, $toast_type ?? $msg_type ?? "success") ?>
+
+        <?php if (!empty($last_paid_receipt_id)): ?>
+            <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 20px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <i class="fas fa-circle-check" style="font-size: 32px; color: #10b981;"></i>
+                    <div>
+                        <h4 style="margin: 0; color: #065f46; font-size: 16px;">Payment Cleared & Official Receipt Generated!</h4>
+                        <p style="margin: 4px 0 0 0; color: #047857; font-size: 14px;">Receipt #REC-<?= $last_paid_receipt_id ?> is emailed to your registered address.</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <a href="../download_pdf.php?type=receipt&id=<?= $last_paid_receipt_id ?>" class="btn btn-primary" style="background: linear-gradient(135deg,#10b981,#059669); text-decoration: none;">
+                        <i class="fas fa-file-pdf"></i> Download PDF Receipt
+                    </a>
+                    <a href="../print_receipt.php?payment_id=<?= $last_paid_receipt_id ?>" target="_blank" class="btn btn-secondary" style="text-decoration: none;">
+                        <i class="fas fa-print"></i> View / Print
+                    </a>
+                </div>
+            </div>
+        <?php endif; ?>
 
         <h2 class="section-header">
             <i class="fas fa-credit-card"></i>

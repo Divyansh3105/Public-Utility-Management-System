@@ -98,8 +98,13 @@ $address = $payment["Address"] ?? "N/A";
         </table>
 
         <div style="text-align: center; margin-top: 30px;" class="no-print">
-            <button onclick="window.print()" class="btn btn-primary"><i class="fas fa-print"></i> Print / Save PDF</button>
-            <a href="javascript:history.back()" class="btn btn-secondary" style="margin-left:10px;"><i class="fas fa-arrow-left"></i> Back</a>
+            <a href="download_pdf.php?type=receipt&id=<?= $payment_id ?: $bill_id ?>" class="btn btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; padding:10px 20px; border-radius:8px;">
+                <i class="fas fa-file-pdf"></i> Download Official PDF
+            </a>
+            <button onclick="window.print()" class="btn btn-secondary" style="margin-left:8px; padding:10px 18px; border-radius:8px;">
+                <i class="fas fa-print"></i> Print
+            </button>
+            <a href="javascript:history.back()" class="btn btn-secondary" style="margin-left:8px; padding:10px 18px; border-radius:8px;"><i class="fas fa-arrow-left"></i> Back</a>
         </div>
     </div>
 </body>

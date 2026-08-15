@@ -115,6 +115,7 @@ $water->data_seek(0);
                         <th>Amount</th>
                         <th>Due Date</th>
                         <th>Status</th>
+                        <th style="text-align: right;">Statement</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -131,11 +132,16 @@ $water->data_seek(0);
                                         <?= htmlspecialchars($row['Status']) ?>
                                     </span>
                                 </td>
+                                <td style="text-align: right;">
+                                    <a href="../download_pdf.php?type=bill&id=<?= $row['Bill_ID'] ?>&bill_type=Electric" class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;" title="Download PDF Statement">
+                                        <i class="fas fa-file-pdf" style="color:#ef4444;"></i> PDF
+                                    </a>
+                                </td>
                             </tr>
                         <?php endwhile; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6">
+                            <td colspan="7">
                                 <div class="empty-state">
                                     <i class="fas fa-inbox"></i>
                                     <p>No electricity bills found</p>
@@ -174,6 +180,7 @@ $water->data_seek(0);
                         <th>Amount</th>
                         <th>Due Date</th>
                         <th>Status</th>
+                        <th style="text-align: right;">Statement</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -190,11 +197,16 @@ $water->data_seek(0);
                                         <?= htmlspecialchars($row['Status']) ?>
                                     </span>
                                 </td>
+                                <td style="text-align: right;">
+                                    <a href="../download_pdf.php?type=bill&id=<?= $row['Bill_ID'] ?>&bill_type=Water" class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;" title="Download PDF Statement">
+                                        <i class="fas fa-file-pdf" style="color:#ef4444;"></i> PDF
+                                    </a>
+                                </td>
                             </tr>
                         <?php endwhile; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6">
+                            <td colspan="7">
                                 <div class="empty-state">
                                     <i class="fas fa-inbox"></i>
                                     <p>No water bills found</p>

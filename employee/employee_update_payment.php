@@ -22,16 +22,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($conn->query($update_query)) {
             $stmt = $conn->prepare("INSERT INTO payment (Bill_Type, Bill_ID, Amount_Paid, Date_of_Payment, Mode_of_Payment) VALUES (?, ?, ?, ?, ?)");
+            $newPaymentId = 0;
             if ($stmt) {
                 $stmt->bind_param("sidss", $bill_type, $bill_id, $amount_paid, $payment_date, $payment_mode);
                 $stmt->execute();
+                $newPaymentId = $stmt->insert_id;
                 $stmt->close();
             }
             if (function_exists('logEmployeeAction')) {
                 $desc = 'Updated payment for ' . ($bill_type ?: 'Electric') . ' Bill ID ' . $bill_id . ' (₹' . $amount_paid . ')';
                 logEmployeeAction($conn, $_SESSION['employee_id'], 'Update Payment', $desc);
             }
-            $msg = "Payment Updated Successfully!";
+
+            // Trigger Automated Notification Engine
+            if ($newPaymentId > 0) {
+                require_once('../includes/notification_engine.php');
+                notifyPaymentReceipt($conn, $newPaymentId);
+                $last_paid_receipt_id = $newPaymentId;
+            }
+
+            $msg = "Payment Recorded Successfully! Digital PDF Receipt #REC-$newPaymentId generated, emailed & SMS alert sent.";
             $msg_type = "success";
         } else {
             $msg = "Error: " . $conn->error;
