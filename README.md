@@ -772,19 +772,30 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
-## 👤 Author
+## 👨‍💻 About the Authors
 
 <div align="center">
 
-### **Divyansh**
+### Divyansh Garg
 
-🎓 B.Tech in Computer Science & Engineering
-💻 Full-Stack Developer | Student Innovator
-🌟 Passionate about building practical solutions
+**Full-Stack Developer | Web Designer | AC Enthusiast**
 
-[![Email](https://img.shields.io/badge/Email-divyanshgarg3105%40gmail.com-red?style=for-the-badge&logo=gmail&logoColor=white)](mailto:divyanshgarg3105@gmail.com)
-[![GitHub](https://img.shields.io/badge/GitHub-Divyansh3105-black?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Divyansh3105)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/divyanshgarg3105)
+[![Portfolio](https://img.shields.io/badge/Portfolio-FF5722?style=for-the-badge&logo=google-chrome&logoColor=white)](https://divyansh3105.github.io/Portfolio/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/divyanshgarg3105/)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Divyansh3105)
+
+_🧠 Brain + 💻 Keyboard = ✨ Magic_
+
+---
+
+### Utkarsh Negi
+
+**Computer Science Engineer | Developer | Tech Enthusiast**
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](www.linkedin.com/in/negiutkarsh)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/UtkarshNegi01)
+
+_💻 Code + 🚀 Curiosity = ✨ Innovation_
 
 </div>
 
